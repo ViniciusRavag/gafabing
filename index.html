@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bingo GAFA - Controle de Sorteio</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/montserrat@latest/latin-400.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/montserrat@latest/latin-600.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/montserrat@latest/latin-700.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/montserrat@latest/latin-800.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/montserrat@latest/latin-900.css">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+  background: #f0f0f0; color: #1a1a1a;
+}
+#bingo-app { width: 100%; height: 100vh; display: flex; flex-direction: column; }
+
+/* ================= ABAS ================= */
+.tabbar { display: flex; border-bottom: 2px solid #1a1a1a; flex-shrink: 0; background: #fff; }
+.tab { flex: 1; padding: 14px 24px; border: none; background: #e8e8e8; cursor: pointer; color: #666; font-weight: 700; font-size: 15px; transition: all .15s; text-transform: uppercase; letter-spacing: 1px; font-family: inherit; }
+.tab:hover { background: #ddd; }
+.tab.active { background: #F8811C; color: #fff; }
+
+.panel { display: none; flex: 1; min-height: 0; }
+.panel.active { display: flex; }
+
+/* ================================================================
+   ===== PAINEL ORGANIZADOR =====
+   ================================================================ */
+#panel-org { flex-direction: row; }
+.org-left, .org-right { padding: 20px; overflow: hidden; display: flex; flex-direction: column; }
+.org-left { flex: 1; min-width: 0; gap: 16px; overflow-y: auto; }
+.org-right { flex: 1; min-width: 0; gap: 10px; background: #fff; border-left: 2px solid #ddd; }
+
+.card { background: #fff; border: 1px solid #ddd; border-radius: 12px; padding: 18px; flex-shrink: 0; }
+.card-title { font-size: 13px; color: #888; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 12px; }
+
+.row { display: flex; gap: 10px; align-items: center; }
+.row label { font-size: 13px; color: #555; min-width: 90px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
+.row select { flex: 1; padding: 10px 12px; border-radius: 8px; border: 1.5px solid #ccc; background: #fff; font-size: 14px; cursor: pointer; font-family: inherit; }
+
+.prizebox { text-align: center; padding: 16px; border-radius: 10px; background: #fff8f1; border: 2px dashed #F8811C; margin-top: 12px; }
+.prizebox h2 { margin: 0; font-size: 17px; font-weight: 700; color: #1a1a1a; line-height: 1.3; }
+.org-banner-preview { width: 100%; max-width: 440px; height: auto; display: block; margin: 12px auto 0; background: #fff; border: 1px solid #eee; border-radius: 10px; }
+
+.ctrl { display: flex; gap: 8px; flex-wrap: wrap; }
+.ctrl button { flex: 1; min-width: 120px; padding: 14px 18px; border-radius: 10px; border: 2px solid #ddd; background: #fff; cursor: pointer; font-weight: 700; font-size: 14px; transition: all .12s; text-transform: uppercase; letter-spacing: .5px; font-family: inherit; }
+.ctrl button:hover { background: #fff4ea; border-color: #F8811C; }
+.ctrl button.warn { background: #fef2f2; color: #dc2626; border-color: #dc2626; }
+.ctrl button.warn:hover { background: #fee2e2; }
+
+.bigball-wrap { display: flex; align-items: center; gap: 20px; }
+.bigball {
+  width: 104px; height: 104px; border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #ffd9a6, #fb9a3e 35%, #F8811C 62%, #c56200 100%);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 10px 20px rgba(0,0,0,.28), inset -6px -10px 16px rgba(0,0,0,.15);
+  animation: pop .35s cubic-bezier(.34,1.56,.64,1); flex-shrink: 0;
+}
+.bb-disc { width: 66%; aspect-ratio: 1; border-radius: 50%; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
+.bigball-letter { font-size: 12px; font-weight: 800; color: #e07000; letter-spacing: 2px; line-height: 1; }
+.bigball-number { font-size: 30px; font-weight: 800; color: #111; line-height: 1; font-variant-numeric: tabular-nums; }
+.bigball-info { display: flex; flex-direction: column; gap: 4px; }
+.bigball-info .lbl { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+.bigball-info .cnt { font-size: 14px; color: #888; font-weight: 600; }
+@keyframes pop { 0%{transform:scale(.5)} 70%{transform:scale(1.1)} 100%{transform:scale(1)} }
+
+.hist-wrap { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.hist-title { font-size: 13px; color: #888; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 8px; }
+.hist { display: flex; flex-wrap: wrap; gap: 5px; overflow-y: auto; align-content: flex-start; }
+.hist span { padding: 5px 10px; border-radius: 6px; background: #eee; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.hist span.recent { background: #F8811C; color: #fff; }
+
+.grid-labels { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.grid-labels div { text-align: center; font-size: 22px; font-weight: 800; padding: 8px; background: #1a1a1a; color: #fff; border-radius: 8px; }
+.grid75 { display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(15, 1fr); grid-auto-flow: column; gap: 5px; flex: 1; min-height: 0; overflow-y: auto; }
+.grid-cell { display: flex; align-items: center; justify-content: center; border-radius: 6px; border: 1.5px solid #e0e0e0; background: #f8f8f8; color: #444; font-weight: 700; font-size: 15px; font-variant-numeric: tabular-nums; cursor: pointer; transition: background .12s, transform .1s; user-select: none; }
+.grid-cell:not(.called):hover { background: #ffe8d1; border-color: #F8811C; }
+.grid-cell:not(.called):active { transform: scale(.94); }
+.grid-cell.called { background: #F8811C; color: #fff; border-color: #F8811C; cursor: default; }
+.grid-cell.latest { box-shadow: 0 0 0 3px #1a1a1a; }
+
+/* ================================================================
+   ===== MODO TELAO - fundo laranja #F8811C =====
+   ================================================================ */
+#panel-screen { flex-direction: row; position: relative; background: #F8811C; color: #1a1a1a; overflow: hidden; }
+
+#panel-screen::before { content: ""; position: absolute; z-index: 0; left: clamp(34px, 3vw, 70px); top: clamp(70px, 9vh, 105px); bottom: 0; width: clamp(6px, .55vw, 12px); background: #fff; }
+#panel-screen::after { content: ""; position: absolute; z-index: 0; left: calc(-1 * clamp(50px, 5vw, 120px)); top: calc(-1 * clamp(8px, 2vh, 34px)); width: clamp(220px, 17vw, 400px); height: clamp(44px, 6.5vh, 82px); background: #fff; transform: rotate(-22deg); }
+
+.deco { position: absolute; z-index: 1; pointer-events: none; filter: drop-shadow(0 12px 16px rgba(0,0,0,.30)); }
+.deco svg { display: block; width: 100%; height: auto; }
+.deco-1 { width: clamp(46px, 4.5vw, 102px); top: -2%; left: 41.4%; transform: rotate(14deg); }
+.deco-2 { width: clamp(84px, 8.4vw, 190px); top: 4%;  left: 42.4%; transform: rotate(-9deg); }
+.deco-3 { width: clamp(84px, 8vw, 176px);   top: 51%; left: -3.2%; transform: rotate(7deg) scaleX(-1); }
+
+.screen-left, .screen-right { overflow: hidden; display: flex; flex-direction: column; position: relative; z-index: 2; }
+.screen-left { flex: 1; min-width: 0; padding: clamp(18px, 3vh, 40px) clamp(20px, 3.4vw, 44px) clamp(18px, 3vh, 40px) clamp(56px, 6vw, 120px); justify-content: center; gap: clamp(10px, 2.2vh, 26px); }
+.screen-right { flex: 1.08; min-width: 0; padding: clamp(18px, 3.4vh, 42px) clamp(20px, 2.2vw, 42px) clamp(18px, 3.4vh, 42px) 0; justify-content: center; }
+
+/* ----- Logos ----- */
+.screen-logos { display: flex; flex-direction: column; align-items: flex-start; gap: clamp(8px, 1.4vh, 18px); }
+.logo-acif { display: flex; align-items: center; gap: clamp(8px, .8vw, 16px); color: #fff; font-weight: 800; font-size: clamp(16px, 1.65vw, 36px); letter-spacing: .5px; line-height: 1; }
+.logo-acif i { width: 3px; height: 1.05em; background: #fff; display: block; border-radius: 2px; }
+
+/* Logo do Bingo: vira IMAGEM. Cole a URL em LOGO_BINGO_URL no script. */
+.logo-bingo { width: clamp(230px, 27vw, 600px); }
+.logo-bingo img, .logo-bingo svg { display: block; width: 100%; height: auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.16)); }
+
+/* ----- Circulo do ultimo numero ----- */
+.lastnumber-circle { align-self: center; width: min(40vh, 25vw); aspect-ratio: 1; border-radius: 50%; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(6px, 1.4vh, 16px); text-align: center; flex-shrink: 0; box-shadow: 0 16px 40px rgba(0,0,0,.20); animation: pop .4s cubic-bezier(.34,1.56,.64,1); }
+.ln-label { font-size: clamp(12px, 1.45vw, 26px); letter-spacing: .12em; color: #222; font-weight: 600; }
+.ln-value { font-size: clamp(46px, 6.4vw, 118px); font-weight: 800; color: #0d0d0d; line-height: 1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.ln-sorteado { font-size: clamp(12px, 1.45vw, 26px); letter-spacing: .18em; color: #222; font-weight: 600; }
+
+/* ----- Faixa do torneio + BANNER do premio ----- */
+.tourney-pill { position: relative; z-index: 2; background: #111; color: #fff; font-weight: 700; font-size: clamp(13px, 1.4vw, 24px); letter-spacing: .06em; text-transform: uppercase; padding: clamp(10px, 1.5vh, 18px) clamp(24px, 2.6vw, 46px); border-radius: 10px; width: fit-content; margin: 0 0 calc(-1 * clamp(12px, 2vh, 22px)) clamp(40px, 4.6vw, 96px); }
+
+/* Area do premio: sempre uma IMAGEM (banner do produto) */
+.prize-banner { position: relative; z-index: 1; }
+.prize-banner img, .prize-banner svg { display: block; width: 100%; height: auto; max-height: 36vh; object-fit: contain; box-shadow: 0 10px 28px rgba(0,0,0,.20); border-radius: 16px; background: transparent; }
+
+/* ----- Cartao branco com a grade ----- */
+.screen-grid-card { background: #fff; border-radius: 22px; padding: clamp(16px, 2.4vh, 30px) clamp(16px, 1.8vw, 28px); flex: 1; display: flex; flex-direction: column; min-height: 0; box-shadow: 0 14px 40px rgba(0,0,0,.22); }
+.screen-grid { display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(15, 1fr); grid-auto-flow: column; gap: clamp(5px, .9vh, 10px); flex: 1; min-height: 0; }
+.screen-grid .sgCell { display: flex; align-items: center; justify-content: center; font-size: clamp(10px, 1.05vw, 16px); border-radius: 7px; background: #d9d9d9; font-weight: 600; font-variant-numeric: tabular-nums; color: #9c9c9c; transition: background .15s, color .15s; }
+.screen-grid .sgCell.on { background: #F8811C; color: #fff; font-weight: 800; }
+.screen-grid .sgCell.latestNew { box-shadow: 0 0 0 3px #111; }
+
+@media (max-width: 900px) {
+  #panel-org, #panel-screen { flex-direction: column; }
+  .org-right { border-left: none; border-top: 2px solid #ddd; }
+  #panel-screen::before, #panel-screen::after { display: none; }
+  .deco { display: none; }
+  .screen-left { padding: 24px 20px; }
+  .screen-right { padding: 0 20px 20px; }
+  .lastnumber-circle { width: 210px; }
+  .ln-value { font-size: 56px; }
+  .logo-bingo { width: 250px; }
+  .tourney-pill { margin-left: 24px; }
+  .prize-banner img, .prize-banner svg { max-height: 180px; }
+}
+</style>
+<base target="_blank">
+</head>
+<body>
+
+<div id="bingo-app">
+
+  <div class="tabbar">
+    <button class="tab active" onclick="setTab('org')">Organizador</button>
+    <button class="tab" onclick="setTab('screen')">Modo Telao</button>
+  </div>
+
+  <!-- ================= PAINEL ORGANIZADOR ================= -->
+  <div id="panel-org" class="panel active">
+    <div class="org-left">
+
+      <div class="card">
+        <div class="card-title">Configuracao da rodada</div>
+        <div class="row"><label>Premio:</label><select id="selPrize" onchange="updateRound()"></select></div>
+        <div class="prizebox">
+          <h2 id="roundDisplay"></h2>
+          <img id="orgBannerPreview" class="org-banner-preview" src="" alt="Previa do banner exibido no telao">
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Controles</div>
+        <div class="ctrl">
+          <button onclick="undoLast()">Desfazer</button>
+          <button class="warn" onclick="newRound()">Nova Rodada</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="bigball-wrap">
+          <div class="bigball" id="lastBall">
+            <div class="bb-disc">
+              <div class="bigball-letter" id="lastLetterBall">-</div>
+              <div class="bigball-number" id="lastNumberBall">-</div>
+            </div>
+          </div>
+          <div class="bigball-info">
+            <div class="lbl">Ultimo registrado</div>
+            <div class="cnt">Sorteados: <span id="drawnCount">0</span> / 75</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card hist-wrap">
+        <div class="hist-title">Historico</div>
+        <div class="hist" id="history"></div>
+      </div>
+
+    </div>
+
+    <div class="org-right">
+      <div class="grid-labels"><div>B</div><div>I</div><div>N</div><div>G</div><div>O</div></div>
+      <div class="grid75" id="numGrid"></div>
+    </div>
+  </div>
+
+  <!-- ================= PAINEL TELAO ================= -->
+  <div id="panel-screen" class="panel">
+
+    <span class="deco deco-1" aria-hidden="true">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs><radialGradient id="gb2" cx="35%" cy="30%" r="80%"><stop offset="0%" stop-color="#ffe0b3"/><stop offset="35%" stop-color="#fb9a3e"/><stop offset="75%" stop-color="#F8811C"/><stop offset="100%" stop-color="#b95c00"/></radialGradient></defs>
+        <circle cx="50" cy="50" r="49" fill="url(#gb2)"/>
+        <ellipse cx="35" cy="24" rx="13" ry="8" fill="#fff" opacity=".35" transform="rotate(-18 35 24)"/>
+        <ellipse cx="85" cy="62" rx="9" ry="13" fill="#fff" transform="rotate(18 85 62)"/>
+        <circle cx="48" cy="46" r="26" fill="#fff"/>
+        <text x="48" y="48" text-anchor="middle" dominant-baseline="central" font-family="Montserrat, Arial, sans-serif" font-weight="800" font-size="34" fill="#111">2</text>
+      </svg>
+    </span>
+    <span class="deco deco-2" aria-hidden="true">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs><radialGradient id="gb3" cx="35%" cy="30%" r="80%"><stop offset="0%" stop-color="#ffe0b3"/><stop offset="35%" stop-color="#fb9a3e"/><stop offset="75%" stop-color="#F8811C"/><stop offset="100%" stop-color="#b95c00"/></radialGradient></defs>
+        <circle cx="50" cy="50" r="49" fill="url(#gb3)"/>
+        <ellipse cx="35" cy="24" rx="13" ry="8" fill="#fff" opacity=".35" transform="rotate(-18 35 24)"/>
+        <ellipse cx="86" cy="58" rx="9" ry="14" fill="#fff" transform="rotate(16 86 58)"/>
+        <ellipse cx="52" cy="88" rx="12" ry="8" fill="#fff" transform="rotate(-14 52 88)"/>
+        <circle cx="48" cy="46" r="26" fill="#fff"/>
+        <text x="48" y="48" text-anchor="middle" dominant-baseline="central" font-family="Montserrat, Arial, sans-serif" font-weight="800" font-size="34" fill="#111">3</text>
+      </svg>
+    </span>
+    <span class="deco deco-3" aria-hidden="true">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <defs><radialGradient id="gb4" cx="35%" cy="30%" r="80%"><stop offset="0%" stop-color="#ffe0b3"/><stop offset="35%" stop-color="#fb9a3e"/><stop offset="75%" stop-color="#F8811C"/><stop offset="100%" stop-color="#b95c00"/></radialGradient></defs>
+        <circle cx="50" cy="50" r="49" fill="url(#gb4)"/>
+        <ellipse cx="35" cy="24" rx="13" ry="8" fill="#fff" opacity=".35" transform="rotate(-18 35 24)"/>
+        <ellipse cx="86" cy="56" rx="9" ry="14" fill="#fff" transform="rotate(16 86 56)"/>
+        <circle cx="48" cy="46" r="26" fill="#fff"/>
+        <text x="48" y="48" text-anchor="middle" dominant-baseline="central" font-family="Montserrat, Arial, sans-serif" font-weight="800" font-size="34" fill="#111">3</text>
+      </svg>
+    </span>
+
+    <div class="screen-left">
+
+      <div class="screen-logos">
+        <div class="logo-acif"><span>ACIF</span><i></i><span>GAFA</span></div>
+        <!-- Logo do Bingo: IMAGEM configuravel via LOGO_BINGO_URL -->
+        <div class="logo-bingo" id="logoBingoBox"></div>
+      </div>
+
+      <div class="lastnumber-circle">
+        <div class="ln-label">ULTIMO NUMERO</div>
+        <div class="ln-value" id="scValue">B-00</div>
+        <div class="ln-sorteado">SORTEADO</div>
+      </div>
+
+      <div class="tourney-pill" id="scTourney">TORNEIO A | VERT. HOR.</div>
+
+      <!-- Banner do premio: IMAGEM configuravel por produto (campo "banner") -->
+      <div class="prize-banner" id="scPrizeBanner"></div>
+
+    </div>
+
+    <div class="screen-right">
+      <div class="screen-grid-card">
+        <div class="screen-grid" id="scGrid"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// =====================================================================
+// ===== CONFIGURACOES VISUAIS (cole aqui os links reais) =====
+// =====================================================================
+// URL da logo "Bingo Mamma Mia!" (PNG/SVG com fundo transparente).
+// Enquanto estiver vazia (""), sera usada a logo desenhada embutida.
+const LOGO_BINGO_URL = "";
+
+// Texto da faixa preta do torneio exibida no telao
+const tournamentLabel = "TORNEIO A | VERT. HOR.";
+
+// =====================================================================
+// ===== PREMIOS =====
+// =====================================================================
+// "banner": LINK DA IMAGEM do premio (banner produzido, ex.: 900x250px).
+//   E a imagem que aparece no telao quando o premio e selecionado.
+//   Enquanto estiver vazio (""), um banner provisorio e gerado
+//   automaticamente com o nome do premio, apenas como referencia.
+// "cartela": opcional { label, color }; se omitido, segue o ciclo padrao.
+const prizes = [
+  { name: "Kit WMJoias - Conjunto brincos, anel, colar",      banner: "", cartela: { label: "Cartela Verde", color: "#3cb54a" }, art: "kit" },
+  { name: "Conjunto colar e brinco banhado a ouro esmeralda", banner: "", cartela: null, art: "esmeralda" },
+  { name: "Bolsa e carteira feminina Arezzo Bege",            banner: "", cartela: null, art: "bolsa" },
+  { name: "Camiseta Franca Basquete",                         banner: "", cartela: null, art: "camiseta" },
+  { name: "Purificador de agua Slim",                         banner: "", cartela: null, art: "purificador" },
+  { name: "Air Fryer Electrolux",                             banner: "", cartela: null, art: "airfryer" },
+  { name: "Furadeira de Impacto Hobby",                       banner: "", cartela: null, art: "furadeira" },
+  { name: "Mala para Ferramenta com 19 bolsos",               banner: "", cartela: null, art: "mala" }
+];
+
+const cartelaCycle = [
+  { label: "Cartela Verde",   color: "#3cb54a" },
+  { label: "Cartela Azul",    color: "#2563eb" },
+  { label: "Cartela Rosa",    color: "#ec4899" },
+  { label: "Cartela Amarela", color: "#f59e0b" }
+];
+function defaultCartela(i) { return cartelaCycle[i % cartelaCycle.length]; }
+
+// ===== ILUSTRACOES PROVISOrias DOS PRODUTOS (usadas so no banner gerado) =====
+const ICONS = {
+  kit: `<g transform="rotate(-8 23 58)"><rect x="8" y="38" width="30" height="40" rx="3" fill="#1c1c1c"/><rect x="18" y="54" width="11" height="3.5" rx="1.5" fill="#d9b36a"/></g><rect x="42" y="46" width="50" height="34" rx="3" fill="#242424"/><rect x="46" y="50" width="42" height="26" rx="2" fill="#3a3a3a"/><path d="M52 54 q15 20 30 0" stroke="#e8c579" stroke-width="2.5" fill="none"/><path d="M67 68 c-3 -4 -9 -2 -9 3 c0 4 9 8 9 8 c0 0 9 -4 9 -8 c0 -5 -6 -7 -9 -3z" fill="#e8c579"/><circle cx="52" cy="56" r="4" fill="#e8c579"/><circle cx="82" cy="56" r="4" fill="#e8c579"/>`,
+  esmeralda: `<path d="M22 28 q28 44 56 0" stroke="#e8c579" stroke-width="3" fill="none"/><circle cx="50" cy="50" r="3" fill="#e8c579"/><path d="M50 52 c-7 9 -7 16 0 21 c7 -5 7 -12 0 -21z" fill="#2e9e4f"/><circle cx="22" cy="30" r="5" fill="#2e9e4f"/><circle cx="78" cy="30" r="5" fill="#2e9e4f"/><circle cx="22" cy="22" r="2" fill="#e8c579"/><circle cx="78" cy="22" r="2" fill="#e8c579"/>`,
+  bolsa: `<path d="M14 44 h40 l6 34 h-52 z" fill="#d9c0a3"/><path d="M24 44 q10 -20 20 0" stroke="#c4a888" stroke-width="4" fill="none"/><rect x="15" y="52" width="45" height="4" fill="#c4a888" opacity=".7"/><rect x="64" y="56" width="26" height="20" rx="3" fill="#e6d3ba"/><rect x="64" y="62" width="26" height="3" fill="#c4a888"/><circle cx="77" cy="69" r="2.5" fill="#b39672"/>`,
+  camiseta: `<path d="M36 20 l-22 11 8 15 8 -4 v38 h40 v-38 l8 4 8 -15 -22 -11 q-6 9 -14 9 q-8 0 -14 -9z" fill="#1d3a6e"/><path d="M36 20 q14 12 28 0" stroke="#f07818" stroke-width="3" fill="none"/><rect x="30" y="72" width="40" height="4" fill="#f07818"/>`,
+  purificador: `<rect x="34" y="14" width="32" height="64" rx="7" fill="#f4f4f4" stroke="#c9c9c9" stroke-width="2"/><rect x="42" y="24" width="16" height="10" rx="2" fill="#bcd7ee"/><rect x="45" y="44" width="10" height="6" rx="2" fill="#9fb6c9"/><rect x="48" y="50" width="4" height="7" fill="#9fb6c9"/><path d="M50 60 c-4 5 -4 9 0 12 c4 -3 4 -7 0 -12z" fill="#4aa3e0"/><rect x="30" y="78" width="40" height="6" rx="3" fill="#dcdcdc"/>`,
+  airfryer: `<rect x="30" y="16" width="40" height="66" rx="9" fill="#262626"/><rect x="38" y="24" width="24" height="9" rx="2" fill="#8fd8ff"/><rect x="34" y="42" width="32" height="3" rx="1.5" fill="#4d4d4d"/><rect x="36" y="48" width="28" height="8" rx="3" fill="#4d4d4d"/><rect x="44" y="62" width="12" height="4" rx="2" fill="#3a3a3a"/>`,
+  furadeira: `<rect x="18" y="34" width="36" height="20" rx="5" fill="#f07818"/><rect x="54" y="38" width="10" height="12" rx="2" fill="#555555"/><rect x="64" y="42" width="14" height="4" rx="2" fill="#8a8a8a"/><path d="M28 54 l-5 24 h13 l5 -24z" fill="#333333"/><rect x="20" y="40" width="8" height="6" rx="2" fill="#333333"/>`,
+  mala: `<path d="M18 40 h64 l6 36 h-76z" fill="#2b2b2b"/><path d="M40 40 q10 -16 20 0" stroke="#111111" stroke-width="5" fill="none"/><rect x="16" y="52" width="68" height="4" fill="#454545"/><rect x="24" y="58" width="12" height="12" rx="2" fill="#454545"/><rect x="44" y="58" width="12" height="12" rx="2" fill="#454545"/><rect x="64" y="58" width="12" height="12" rx="2" fill="#454545"/>`
+};
+
+// ===== LOGO PROVISOria (usada so enquanto LOGO_BINGO_URL estiver vazio) =====
+const LOGO_FALLBACK_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 160">
+  <g font-family="Montserrat, Arial, sans-serif" font-weight="900" text-anchor="middle">
+    <g transform="rotate(-8 34 56)"><rect x="8" y="30" width="52" height="52" rx="6" fill="#fff"/><text x="34" y="69" font-size="38" fill="#F8811C">B</text></g>
+    <g transform="rotate(7 78 51)"><rect x="62" y="22" width="32" height="58" rx="6" fill="#fff"/><text x="78" y="64" font-size="36" fill="#F8811C">I</text></g>
+    <g transform="rotate(4 124 54)"><rect x="96" y="26" width="56" height="56" rx="6" fill="#fff"/><text x="124" y="68" font-size="40" fill="#F8811C">N</text></g>
+    <g transform="rotate(-6 178 60)"><rect x="154" y="36" width="48" height="48" rx="6" fill="#fff"/><text x="178" y="72" font-size="36" fill="#F8811C">G</text></g>
+    <g transform="rotate(3 235 49)"><rect x="204" y="18" width="62" height="62" rx="6" fill="#fff"/><text x="235" y="66" font-size="46" fill="#F8811C">O</text></g>
+    <g transform="rotate(-2.5 165 121)"><rect x="40" y="95" width="250" height="52" rx="8" fill="#fff"/><text x="165" y="133" font-size="34" fill="#F8811C">Mamma Mia!</text></g>
+  </g>
+  <g transform="translate(2,62) scale(0.9) rotate(-12 32 36)">
+    <g fill="#ffffff">
+      <path d="M28 6 C26 16 25 26 26 36 L40 36 C41 24 39 14 35 5 C33 1 29 1 28 6 Z"/>
+      <ellipse cx="33" cy="48" rx="17" ry="15"/>
+      <ellipse cx="17" cy="42" rx="6.5" ry="13" transform="rotate(22 17 42)"/>
+      <ellipse cx="49" cy="42" rx="6" ry="12" transform="rotate(-16 49 42)"/>
+      <rect x="24" y="58" width="18" height="12" rx="6"/>
+    </g>
+    <g stroke="#ffffff" stroke-width="3" fill="none" stroke-linecap="round">
+      <path d="M8 20 q6 -6 12 -8"/><path d="M5 30 q7 -4 13 -5"/>
+    </g>
+  </g>
+</svg>`;
+
+// ===== UTILITARIOS =====
+const svgUri = s => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s);
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const escAttr = s => esc(s).replace(/"/g,'&quot;');
+function wrapText(s, max) {
+  const words = s.split(' '); const out = []; let cur = '';
+  for (const w of words) {
+    if ((cur + ' ' + w).trim().length > max) { if (cur) out.push(cur); cur = w; }
+    else cur = (cur + ' ' + w).trim();
+  }
+  if (cur) out.push(cur);
+  return out.slice(0, 3);
+}
+
+// Banner provisorio do premio (usado apenas enquanto "banner" estiver vazio)
+function fallbackBannerSVG(p, idx, cartela) {
+  const lines = wrapText(p.name.toUpperCase(), 26);
+  const tspans = lines.map((ln, i) => `<tspan x="210" dy="${i ? 46 : 0}">${esc(ln)}</tspan>`).join('');
+  const bw = cartela.label.length * 15 + 44;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 250">
+    <rect width="900" height="250" rx="24" fill="#ffffff"/>
+    <svg x="26" y="45" width="160" height="160" viewBox="0 0 100 100">${ICONS[p.art] || ''}</svg>
+    <text x="210" y="82" font-family="Montserrat, Arial, sans-serif" font-style="italic" font-weight="600" font-size="32" fill="#111">Rodada ${idx + 1}</text>
+    <g transform="translate(375,48) skewX(-8)">
+      <rect width="${bw}" height="44" rx="10" fill="${cartela.color}"/>
+      <text x="${bw / 2}" y="30" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-style="italic" font-weight="600" font-size="24" fill="#fff">${esc(cartela.label)}</text>
+    </g>
+    <text x="210" y="152" font-family="Montserrat, Arial, sans-serif" font-weight="800" font-size="38" fill="#141414" letter-spacing="1">${tspans}</text>
+  </svg>`;
+}
+
+// ===== ESTADO =====
+const letters = ["B", "I", "N", "G", "O"];
+const ranges  = [[1,15], [16,30], [31,45], [46,60], [61,75]];
+let drawn = [];
+let last  = null;
+let currentPrize = 0;
+
+function init() {
+  const sp = document.getElementById('selPrize');
+  prizes.forEach((p, i) => {
+    const o = document.createElement('option');
+    o.value = i; o.textContent = p.name;
+    sp.appendChild(o);
+  });
+  document.getElementById('scTourney').textContent = tournamentLabel;
+
+  // Logo do bingo: imagem real ou provisoria
+  document.getElementById('logoBingoBox').innerHTML =
+    LOGO_BINGO_URL ? `<img src="${escAttr(LOGO_BINGO_URL)}" alt="Bingo Mamma Mia!">` : LOGO_FALLBACK_SVG;
+
+  buildGrid();
+  buildScreenGrid();
+  updateRound();
+  render();
+}
+
+function buildGrid() {
+  const g = document.getElementById('numGrid');
+  for (let c = 0; c < 5; c++) for (let n = ranges[c][0]; n <= ranges[c][1]; n++) {
+    const d = document.createElement('div');
+    d.className = 'grid-cell'; d.textContent = n; d.dataset.n = n;
+    d.onclick = () => registerNumber(n);
+    g.appendChild(d);
+  }
+}
+
+function buildScreenGrid() {
+  const g = document.getElementById('scGrid');
+  g.innerHTML = '';
+  for (let c = 0; c < 5; c++) for (let n = ranges[c][0]; n <= ranges[c][1]; n++) {
+    const d = document.createElement('div');
+    d.className = 'sgCell'; d.dataset.sn = n; d.textContent = n;
+    g.appendChild(d);
+  }
+}
+
+function registerNumber(n) {
+  if (drawn.includes(n)) return;
+  drawn.push(n); last = n; render();
+}
+function undoLast() {
+  if (!drawn.length) return;
+  const n = drawn.pop();
+  if (last === n) last = drawn[drawn.length - 1] || null;
+  render();
+}
+function newRound() {
+  if (!confirm("Iniciar uma nova rodada? Todos os numeros registrados serao apagados.")) return;
+  drawn = []; last = null; render();
+}
+
+// ===== ATUALIZACAO DA RODADA (premio selecionado -> banner no telao) =====
+function updateRound() {
+  currentPrize = +document.getElementById('selPrize').value;
+  const p = prizes[currentPrize];
+  const cartela = p.cartela || defaultCartela(currentPrize);
+
+  document.getElementById('roundDisplay').textContent = p.name;
+
+  // Telao: area do premio vira IMAGEM (banner do produto)
+  const box = document.getElementById('scPrizeBanner');
+  if (p.banner) box.innerHTML = `<img src="${escAttr(p.banner)}" alt="${escAttr(p.name)}">`;
+  else          box.innerHTML = fallbackBannerSVG(p, currentPrize, cartela);
+
+  // Organizador: previa do mesmo banner
+  document.getElementById('orgBannerPreview').src =
+    p.banner || svgUri(fallbackBannerSVG(p, currentPrize, cartela));
+}
+
+function render() {
+  document.querySelectorAll('#numGrid .grid-cell').forEach(b => {
+    const n = +b.dataset.n;
+    b.classList.toggle('called', drawn.includes(n));
+    b.classList.toggle('latest', n === last);
+  });
+  document.querySelectorAll('#scGrid .sgCell').forEach(d => {
+    const n = +d.dataset.sn;
+    d.classList.toggle('on', drawn.includes(n));
+    d.classList.toggle('latestNew', n === last);
+  });
+
+  const letraAtual = last ? letters[Math.ceil(last / 15) - 1] : '-';
+  document.getElementById('lastLetterBall').textContent = letraAtual;
+  document.getElementById('lastNumberBall').textContent = last || '-';
+  document.getElementById('drawnCount').textContent = drawn.length;
+  document.getElementById('scValue').textContent = last ? letraAtual + '-' + String(last).padStart(2, '0') : 'B-00';
+
+  const h = document.getElementById('history');
+  h.innerHTML = '';
+  [...drawn].reverse().forEach((n, i) => {
+    const s = document.createElement('span');
+    s.textContent = letters[Math.ceil(n / 15) - 1] + n;
+    if (i === 0) s.classList.add('recent');
+    h.appendChild(s);
+  });
+}
+
+function setTab(t) {
+  document.querySelectorAll('.tab').forEach(b => {
+    const isActive = (t === 'org' && b.textContent === 'Organizador') ||
+                     (t === 'screen' && b.textContent === 'Modo Telao');
+    b.classList.toggle('active', isActive);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + t));
+}
+
+document.addEventListener('keydown', (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); undoLast(); }
+});
+
+init();
+</script>
+
+</body>
+</html>

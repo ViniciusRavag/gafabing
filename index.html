@@ -275,8 +275,6 @@ body {
 // Enquanto estiver vazia (""), sera usada a logo desenhada embutida.
 const LOGO_BINGO_URL = "https://framerusercontent.com/images/2SQ8qpEsBz91r0yRBzBGkoqjHPo.png";
 
-// Texto da faixa preta do torneio exibida no telao
-const tournamentLabel = "TORNEIO A | VERT. HOR.";
 
 // =====================================================================
 // ===== PREMIOS =====
@@ -393,7 +391,6 @@ function init() {
     o.value = i; o.textContent = p.name;
     sp.appendChild(o);
   });
-  document.getElementById('scTourney').textContent = tournamentLabel;
 
   // Logo do bingo: imagem real ou provisoria
   document.getElementById('logoBingoBox').innerHTML =

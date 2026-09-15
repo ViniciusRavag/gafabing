@@ -181,10 +181,12 @@ img,svg{max-width:100%;}
 #panel-screen::after{content:"";position:absolute;z-index:0;left:calc(-1 * clamp(1px,5vw,12px));top:calc(-1 * clamp(1px,2vh,1px));width:clamp(220px,17vw,400px);height:clamp(7px,6.5vh,2px);background:#fff;transform:rotate(-22deg);}
 
 .deco{position:absolute;z-index:1;pointer-events:none;filter:drop-shadow(0 12px 16px rgba(0,0,0,.30));}
-.deco svg{display:block;width:100%;height:auto;}
+.deco svg, .deco img{display:block;width:100%;height:auto;}
+.deco img{aspect-ratio:1/1;object-fit:contain;}
 .deco-1{width:clamp(46px,4.5vw,102px);top:-2%;left:41.4%;transform:rotate(14deg);}
 .deco-2{width:clamp(84px,8.4vw,190px);top:4%;left:42.4%;transform:rotate(-9deg);}
 .deco-3{width:clamp(84px,8vw,176px);top:51%;left:-3.2%;transform:rotate(7deg) scaleX(-1);}
+
 
 .screen-left,.screen-right{overflow:hidden;display:flex;flex-direction:column;position:relative;z-index:2;min-width:0;}
 .screen-left{flex:1;padding:clamp(18px,3vh,40px) clamp(20px,3.4vw,44px) clamp(18px,3vh,40px) clamp(56px,6vw,120px);justify-content:center;gap:clamp(10px,2.2vh,26px);}
@@ -505,33 +507,14 @@ img,svg{max-width:100%;}
 
   <div id="panel-screen" class="panel">
     <span class="deco deco-1" aria-hidden="true">
-      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <defs><radialGradient id="gbA" cx="35%" cy="30%" r="80%"><stop offset="0%" stop-color="#ffe0b3"/><stop offset="35%" stop-color="#fb9a3e"/><stop offset="75%" stop-color="#F8811C"/><stop offset="100%" stop-color="#b95c00"/></radialGradient></defs>
-        <circle cx="50" cy="50" r="49" fill="url(#gbA)"/>
-        <ellipse cx="35" cy="24" rx="13" ry="8" fill="#fff" opacity=".35" transform="rotate(-18 35 24)"/>
-        <circle cx="48" cy="46" r="26" fill="#fff"/>
-        <text x="48" y="48" text-anchor="middle" dominant-baseline="central" font-family="Montserrat, Arial, sans-serif" font-weight="800" font-size="34" fill="#111">2</text>
-      </svg>
-    </span>
-    <span class="deco deco-2" aria-hidden="true">
-      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <defs><radialGradient id="gbB" cx="35%" cy="30%" r="80%"><stop offset="0%" stop-color="#ffe0b3"/><stop offset="35%" stop-color="#fb9a3e"/><stop offset="75%" stop-color="#F8811C"/><stop offset="100%" stop-color="#b95c00"/></radialGradient></defs>
-        <circle cx="50" cy="50" r="49" fill="url(#gbB)"/>
-        <ellipse cx="35" cy="24" rx="13" ry="8" fill="#fff" opacity=".35" transform="rotate(-18 35 24)"/>
-        <circle cx="48" cy="46" r="26" fill="#fff"/>
-        <text x="48" y="48" text-anchor="middle" dominant-baseline="central" font-family="Montserrat, Arial, sans-serif" font-weight="800" font-size="34" fill="#111">3</text>
-      </svg>
-    </span>
-    <span class="deco deco-3" aria-hidden="true">
-      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <defs><radialGradient id="gbC" cx="35%" cy="30%" r="80%"><stop offset="0%" stop-color="#ffe0b3"/><stop offset="35%" stop-color="#fb9a3e"/><stop offset="75%" stop-color="#F8811C"/><stop offset="100%" stop-color="#b95c00"/></radialGradient></defs>
-        <circle cx="50" cy="50" r="49" fill="url(#gbC)"/>
-        <ellipse cx="35" cy="24" rx="13" ry="8" fill="#fff" opacity=".35" transform="rotate(-18 35 24)"/>
-        <ellipse cx="86" cy="56" rx="9" ry="14" fill="#fff" transform="rotate(16 86 56)"/>
-        <circle cx="48" cy="46" r="26" fill="#fff"/>
-        <text x="48" y="48" text-anchor="middle" dominant-baseline="central" font-family="Montserrat, Arial, sans-serif" font-weight="800" font-size="34" fill="#111">9</text>
-      </svg>
-    </span>
+  <img src="https://framerusercontent.com/images/nL0eXeDCaJQy7PhArObVJo5bR10.png" alt="">
+</span>
+<span class="deco deco-2" aria-hidden="true">
+  <img src="https://framerusercontent.com/images/DpDPEE2J2WCda5MEQNv7fufei4.png" alt="">
+</span>
+<span class="deco deco-3" aria-hidden="true">
+  <img src="https://framerusercontent.com/images/I97BIeQImnAGYarCDtHRs9iNYU.png" alt="">
+</span>
 
     <div class="screen-left">
       <div class="screen-logos">

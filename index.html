@@ -11,12 +11,12 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/montserrat@latest/latin-900.css">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; overflow: hidden; }
+html, body { height: 100%; }
 body {
   font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
   background: #f0f0f0; color: #1a1a1a;
 }
-#bingo-app { width: 100%; height: 100vh; display: flex; flex-direction: column; }
+#bingo-app { width: 100%; height: 100vh; height: 100dvh; display: flex; flex-direction: column; }
 
 /* ================= ABAS ================= */
 .tabbar { display: flex; border-bottom: 2px solid #1a1a1a; flex-shrink: 0; background: #fff; }
@@ -24,7 +24,7 @@ body {
 .tab:hover { background: #ddd; }
 .tab.active { background: #F8811C; color: #fff; }
 
-.panel { display: none; flex: 1; min-height: 0; }
+.panel { display: none; flex: 1; min-height: 0; overflow: hidden; }
 .panel.active { display: flex; }
 
 /* ================================================================
@@ -106,7 +106,6 @@ body {
 .logo-acif { display: flex; align-items: center; gap: clamp(8px, .8vw, 16px); color: #fff; font-weight: 800; font-size: clamp(16px, 1.65vw, 36px); letter-spacing: .5px; line-height: 1; }
 .logo-acif i { width: 3px; height: 1.05em; background: #fff; display: block; border-radius: 2px; }
 
-/* Logo do Bingo: vira IMAGEM. Cole a URL em LOGO_BINGO_URL no script. */
 .logo-bingo { width: clamp(130px, 17vw, 500px); }
 .logo-bingo img, .logo-bingo svg { display: block; width: 100%; height: auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.16)); }
 
@@ -116,9 +115,7 @@ body {
 .ln-value { font-size: clamp(46px, 6.4vw, 118px); font-weight: 800; color: #0d0d0d; line-height: 1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
 .ln-sorteado { font-size: clamp(12px, 1.45vw, 26px); letter-spacing: .18em; color: #222; font-weight: 600; }
 
-
-
-/* Area do premio: sempre uma IMAGEM (banner do produto) */
+/* Area do premio */
 .prize-banner { position: relative; z-index: 1; }
 .prize-banner img, .prize-banner svg { display: block; width: 100%; height: auto; max-height: 36vh; object-fit: contain; border-radius: 16px; background: transparent; }
 
@@ -129,18 +126,124 @@ body {
 .screen-grid .sgCell.on { background: #F8811C; color: #fff; font-weight: 800; }
 .screen-grid .sgCell.latestNew { box-shadow: 0 0 0 3px #111; }
 
+/* ================================================================
+   ===== RESPONSIVO - TABLET (max 900px) =====
+   ================================================================ */
 @media (max-width: 900px) {
-  #panel-org, #panel-screen { flex-direction: column; }
-  .org-right { border-left: none; border-top: 2px solid #ddd; }
+  #panel-org { flex-direction: column; overflow-y: auto; }
+  .org-left { overflow-y: visible; }
+  .org-right { border-left: none; border-top: 2px solid #ddd; min-height: 50vh; }
+  
+  #panel-screen { flex-direction: column; overflow-y: auto; }
   #panel-screen::before, #panel-screen::after { display: none; }
   .deco { display: none; }
-  .screen-left { padding: 24px 20px; }
+  .screen-left { padding: 24px 20px; align-items: center; }
   .screen-right { padding: 0 20px 20px; }
-  .lastnumber-circle { width: 210px; }
-  .ln-value { font-size: 56px; }
-  .logo-bingo { width: 250px; }
-  .tourney-pill { margin-left: 24px; }
+  .lastnumber-circle { width: min(210px, 40vw); }
+  .ln-value { font-size: clamp(36px, 10vw, 56px); }
+  .logo-bingo { width: clamp(160px, 40vw, 250px); }
   .prize-banner img, .prize-banner svg { max-height: 180px; }
+  .screen-grid-card { min-height: 45vh; }
+}
+
+/* ================================================================
+   ===== RESPONSIVO - MOBILE (max 600px) =====
+   ================================================================ */
+@media (max-width: 600px) {
+  html, body { overflow: auto; }
+  #bingo-app { height: auto; min-height: 100vh; min-height: 100dvh; }
+  
+  /* Tabbar mobile */
+  .tab { padding: 12px 8px; font-size: 12px; letter-spacing: .5px; }
+  
+  /* Painel organizador mobile */
+  #panel-org { flex-direction: column; overflow-y: auto; }
+  .org-left { padding: 12px; gap: 12px; overflow-y: visible; }
+  .org-right { border-left: none; border-top: 2px solid #ddd; padding: 12px; min-height: 55vh; }
+  
+  .card { padding: 14px; border-radius: 10px; }
+  .card-title { font-size: 11px; margin-bottom: 10px; }
+  
+  .row { flex-direction: column; align-items: stretch; gap: 6px; }
+  .row label { min-width: unset; font-size: 12px; }
+  .row select { padding: 12px; font-size: 15px; }
+  
+  .prizebox { padding: 12px; margin-top: 10px; }
+  .prizebox h2 { font-size: 15px; }
+  .org-banner-preview { max-width: 100%; margin-top: 8px; }
+  
+  .ctrl { flex-direction: column; }
+  .ctrl button { min-width: unset; padding: 14px; font-size: 13px; }
+  
+  .bigball-wrap { gap: 14px; }
+  .bigball { width: 80px; height: 80px; }
+  .bigball-number { font-size: 24px; }
+  .bigball-letter { font-size: 10px; }
+  .bigball-info .lbl { font-size: 11px; }
+  .bigball-info .cnt { font-size: 13px; }
+  
+  .hist-wrap { min-height: 120px; }
+  .hist { max-height: 150px; }
+  .hist span { padding: 4px 8px; font-size: 12px; }
+  
+  /* Grid mobile */
+  .grid-labels div { font-size: 16px; padding: 6px; border-radius: 6px; }
+  .grid-labels { gap: 4px; }
+  .grid75 { gap: 3px; }
+  .grid-cell { font-size: 12px; border-radius: 4px; border-width: 1px; }
+  
+  /* Painel telao mobile */
+  #panel-screen { flex-direction: column; overflow-y: auto; }
+  #panel-screen::before, #panel-screen::after { display: none; }
+  .deco { display: none; }
+  .screen-left { padding: 16px 14px; gap: 14px; align-items: center; }
+  .screen-right { padding: 0 14px 14px; }
+  
+  .screen-logos { align-items: center; }
+  .logo-bingo { width: clamp(140px, 50vw, 220px); }
+  
+  .lastnumber-circle { width: min(180px, 45vw); gap: 6px; }
+  .ln-label { font-size: clamp(10px, 3vw, 14px); letter-spacing: .08em; }
+  .ln-value { font-size: clamp(32px, 10vw, 48px); }
+  .ln-sorteado { font-size: clamp(10px, 3vw, 14px); letter-spacing: .1em; }
+  
+  .prize-banner img, .prize-banner svg { max-height: 140px; border-radius: 10px; }
+  
+  .screen-grid-card { border-radius: 14px; padding: 10px; min-height: 50vh; }
+  .screen-grid { gap: 3px; }
+  .screen-grid .sgCell { font-size: clamp(9px, 2.5vw, 13px); border-radius: 4px; }
+}
+
+/* ================================================================
+   ===== RESPONSIVO - MOBILE PEQUENO (max 380px) =====
+   ================================================================ */
+@media (max-width: 380px) {
+  .tab { padding: 10px 6px; font-size: 11px; }
+  .org-left { padding: 10px; gap: 10px; }
+  .org-right { padding: 10px; }
+  .card { padding: 12px; }
+  .bigball { width: 68px; height: 68px; }
+  .bigball-number { font-size: 20px; }
+  .bigball-letter { font-size: 9px; }
+  .grid-cell { font-size: 11px; }
+  .grid-labels div { font-size: 14px; padding: 5px; }
+  .lastnumber-circle { width: 150px; }
+  .ln-value { font-size: 36px; }
+  .screen-grid .sgCell { font-size: 9px; }
+}
+
+/* Landscape mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+  #panel-screen { flex-direction: row; overflow: hidden; }
+  .screen-left { flex: 1; padding: 12px 16px; gap: 8px; }
+  .screen-right { flex: 1.2; padding: 12px 16px 12px 0; }
+  .lastnumber-circle { width: min(28vh, 140px); }
+  .ln-value { font-size: clamp(28px, 5vh, 42px); }
+  .logo-bingo { width: clamp(100px, 18vh, 180px); }
+  .prize-banner img, .prize-banner svg { max-height: 20vh; }
+  .screen-grid-card { min-height: unset; }
+  #panel-screen::before, #panel-screen::after { display: block; }
+  .deco { display: block; }
 }
 </style>
 <base target="_blank">
@@ -151,7 +254,7 @@ body {
 
   <div class="tabbar">
     <button class="tab active" onclick="setTab('org')">Organizador</button>
-    <button class="tab" onclick="setTab('screen')">Modo Telao</button>
+    <button class="tab" onclick="setTab('screen')">Modo Telão</button>
   </div>
 
   <!-- ================= PAINEL ORGANIZADOR ================= -->
@@ -159,11 +262,11 @@ body {
     <div class="org-left">
 
       <div class="card">
-        <div class="card-title">Configuracao da rodada</div>
-        <div class="row"><label>Premio:</label><select id="selPrize" onchange="updateRound()"></select></div>
+        <div class="card-title">Configuração da rodada</div>
+        <div class="row"><label>Prêmio:</label><select id="selPrize" onchange="updateRound()"></select></div>
         <div class="prizebox">
           <h2 id="roundDisplay"></h2>
-          <img id="orgBannerPreview" class="org-banner-preview" src="" alt="Previa do banner exibido no telao">
+          <img id="orgBannerPreview" class="org-banner-preview" src="" alt="Prévia do banner exibido no telão">
         </div>
       </div>
 
@@ -203,20 +306,20 @@ body {
     </div>
   </div>
 
-  <!-- ================= PAINEL TELAO ================= -->
+  <!-- ================= PAINEL TELÃO ================= -->
   <div id="panel-screen" class="panel">
 
     <span class="deco deco-1" aria-hidden="true">
       <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <radialGradient id="gb2" cx="35%" cy="30%" r="80%">
+    <radialGradient id="gb1" cx="35%" cy="30%" r="80%">
       <stop offset="0%" stop-color="#ffe0b3"/>
       <stop offset="35%" stop-color="#fb9a3e"/>
       <stop offset="75%" stop-color="#F8811C"/>
       <stop offset="100%" stop-color="#b95c00"/>
     </radialGradient>
   </defs>
-  <circle cx="50" cy="50" r="49" fill="url(#gb2)"/>
+  <circle cx="50" cy="50" r="49" fill="url(#gb1)"/>
   <ellipse cx="35" cy="24" rx="13" ry="8" fill="#fff" opacity=".35" transform="rotate(-18 35 24)"/>
   <circle cx="48" cy="46" r="26" fill="#fff"/>
   <text x="48" y="48" text-anchor="middle" dominant-baseline="central" font-family="Montserrat, Arial, sans-serif" font-weight="800" font-size="34" fill="#111">2</text>
@@ -253,7 +356,6 @@ body {
     <div class="screen-left">
 
       <div class="screen-logos">
-        <!-- Logo do Bingo: IMAGEM configuravel via LOGO_BINGO_URL -->
         <div class="logo-bingo" id="logoBingoBox"></div>
       </div>
 
@@ -263,7 +365,6 @@ body {
         <div class="ln-sorteado">SORTEADO</div>
       </div>
       
-      <!-- Banner do premio: IMAGEM configuravel por produto (campo "banner") -->
       <div class="prize-banner" id="scPrizeBanner"></div>
 
     </div>
@@ -279,21 +380,13 @@ body {
 
 <script>
 // =====================================================================
-// ===== CONFIGURACOES VISUAIS (cole aqui os links reais) =====
+// ===== CONFIGURAÇÕES VISUAIS =====
 // =====================================================================
-// URL da logo "Bingo Mamma Mia!" (PNG/SVG com fundo transparente).
-// Enquanto estiver vazia (""), sera usada a logo desenhada embutida.
 const LOGO_BINGO_URL = "https://framerusercontent.com/images/2SQ8qpEsBz91r0yRBzBGkoqjHPo.png";
 
-
 // =====================================================================
-// ===== PREMIOS =====
+// ===== PRÊMIOS =====
 // =====================================================================
-// "banner": LINK DA IMAGEM do premio (banner produzido, ex.: 900x250px).
-//   E a imagem que aparece no telao quando o premio e selecionado.
-//   Enquanto estiver vazio (""), um banner provisorio e gerado
-//   automaticamente com o nome do premio, apenas como referencia.
-// "cartela": opcional { label, color }; se omitido, segue o ciclo padrao.
 const prizes = [
   { name: "Kit WMJoias - Conjunto brincos, anel, colar",      banner: "https://framerusercontent.com/images/8UWgwTGMT9CtRdqrEk0PQsIDo.png", cartela: { label: "Cartela Verde", color: "#3cb54a" }, art: "kit" },
   { name: "Bolsa e carteira feminina Arezzo",                 banner: "https://framerusercontent.com/images/UFFBhEBZrSuEKFDUFgPv2jXM8U.png", cartela: null, art: "bolsa" },
@@ -303,7 +396,7 @@ const prizes = [
   { name: "Colar WMJoias",                                    banner: "https://framerusercontent.com/images/W3GDcnN2VcjZ2DZKfKNLTUv2FhI.png", cartela: null, art: "colar" },
   { name: "Perfume Masculino",                                banner: "https://framerusercontent.com/images/5R9urMPshNXO137Wvq9RveTUgeE.png", cartela: null, art: "perfumemasc" },
   { name: "Mala",                                             banner: "https://framerusercontent.com/images/7e2GnMCF20ywwPCdT9fKQAhAE4.png", cartela: null, art: "mala" },
-  { name: "Purificador de agua Slim",                         banner: "https://framerusercontent.com/images/io87lK73GpWHuipa8I2WKuy54Y.png", cartela: null, art: "purificador" },
+  { name: "Purificador de água Slim",                         banner: "https://framerusercontent.com/images/io87lK73GpWHuipa8I2WKuy54Y.png", cartela: null, art: "purificador" },
   { name: "Relógio feminino",                                 banner: "https://framerusercontent.com/images/Gwd0ffrQqVCYihvT5wQWBfWMwVs.png", cartela: null, art: "relogio" },
   { name: "Furadeira de Impacto Hobby",                       banner: "https://framerusercontent.com/images/pW41AMD9ziziY5R40jLvyCZGs.png", cartela: null, art: "furadeira" },
   { name: "Perfume Feminino",                                 banner: "https://framerusercontent.com/images/jTsZNA5Ko60Wb6b3SlHAnC4t0.png", cartela: null, art: "perfumefem" },
@@ -320,7 +413,6 @@ const cartelaCycle = [
 ];
 function defaultCartela(i) { return cartelaCycle[i % cartelaCycle.length]; }
 
-// ===== ILUSTRACOES PROVISOrias DOS PRODUTOS (usadas so no banner gerado) =====
 const ICONS = {
   kit: `<g transform="rotate(-8 23 58)"><rect x="8" y="38" width="30" height="40" rx="3" fill="#1c1c1c"/><rect x="18" y="54" width="11" height="3.5" rx="1.5" fill="#d9b36a"/></g><rect x="42" y="46" width="50" height="34" rx="3" fill="#242424"/><rect x="46" y="50" width="42" height="26" rx="2" fill="#3a3a3a"/><path d="M52 54 q15 20 30 0" stroke="#e8c579" stroke-width="2.5" fill="none"/><path d="M67 68 c-3 -4 -9 -2 -9 3 c0 4 9 8 9 8 c0 0 9 -4 9 -8 c0 -5 -6 -7 -9 -3z" fill="#e8c579"/><circle cx="52" cy="56" r="4" fill="#e8c579"/><circle cx="82" cy="56" r="4" fill="#e8c579"/>`,
   esmeralda: `<path d="M22 28 q28 44 56 0" stroke="#e8c579" stroke-width="3" fill="none"/><circle cx="50" cy="50" r="3" fill="#e8c579"/><path d="M50 52 c-7 9 -7 16 0 21 c7 -5 7 -12 0 -21z" fill="#2e9e4f"/><circle cx="22" cy="30" r="5" fill="#2e9e4f"/><circle cx="78" cy="30" r="5" fill="#2e9e4f"/><circle cx="22" cy="22" r="2" fill="#e8c579"/><circle cx="78" cy="22" r="2" fill="#e8c579"/>`,
@@ -332,7 +424,6 @@ const ICONS = {
   mala: `<path d="M18 40 h64 l6 36 h-76z" fill="#2b2b2b"/><path d="M40 40 q10 -16 20 0" stroke="#111111" stroke-width="5" fill="none"/><rect x="16" y="52" width="68" height="4" fill="#454545"/><rect x="24" y="58" width="12" height="12" rx="2" fill="#454545"/><rect x="44" y="58" width="12" height="12" rx="2" fill="#454545"/><rect x="64" y="58" width="12" height="12" rx="2" fill="#454545"/>`
 };
 
-// ===== LOGO PROVISOria (usada so enquanto LOGO_BINGO_URL estiver vazio) =====
 const LOGO_FALLBACK_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 160">
   <g font-family="Montserrat, Arial, sans-serif" font-weight="900" text-anchor="middle">
     <g transform="rotate(-8 34 56)"><rect x="8" y="30" width="52" height="52" rx="6" fill="#fff"/><text x="34" y="69" font-size="38" fill="#F8811C">B</text></g>
@@ -356,7 +447,6 @@ const LOGO_FALLBACK_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 
   </g>
 </svg>`;
 
-// ===== UTILITARIOS =====
 const svgUri = s => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s);
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const escAttr = s => esc(s).replace(/"/g,'&quot;');
@@ -370,7 +460,6 @@ function wrapText(s, max) {
   return out.slice(0, 3);
 }
 
-// Banner provisorio do premio (usado apenas enquanto "banner" estiver vazio)
 function fallbackBannerSVG(p, idx, cartela) {
   const lines = wrapText(p.name.toUpperCase(), 26);
   const tspans = lines.map((ln, i) => `<tspan x="210" dy="${i ? 46 : 0}">${esc(ln)}</tspan>`).join('');
@@ -387,7 +476,6 @@ function fallbackBannerSVG(p, idx, cartela) {
   </svg>`;
 }
 
-// ===== ESTADO =====
 const letters = ["B", "I", "N", "G", "O"];
 const ranges  = [[1,15], [16,30], [31,45], [46,60], [61,75]];
 let drawn = [];
@@ -402,7 +490,6 @@ function init() {
     sp.appendChild(o);
   });
 
-  // Logo do bingo: imagem real ou provisoria
   document.getElementById('logoBingoBox').innerHTML =
     LOGO_BINGO_URL ? `<img src="${escAttr(LOGO_BINGO_URL)}" alt="Bingo Mamma Mia!">` : LOGO_FALLBACK_SVG;
 
@@ -443,11 +530,10 @@ function undoLast() {
   render();
 }
 function newRound() {
-  if (!confirm("Iniciar uma nova rodada? Todos os numeros registrados serao apagados.")) return;
+  if (!confirm("Iniciar uma nova rodada? Todos os números registrados serão apagados.")) return;
   drawn = []; last = null; render();
 }
 
-// ===== ATUALIZACAO DA RODADA (premio selecionado -> banner no telao) =====
 function updateRound() {
   currentPrize = +document.getElementById('selPrize').value;
   const p = prizes[currentPrize];
@@ -455,12 +541,10 @@ function updateRound() {
 
   document.getElementById('roundDisplay').textContent = p.name;
 
-  // Telao: area do premio vira IMAGEM (banner do produto)
   const box = document.getElementById('scPrizeBanner');
   if (p.banner) box.innerHTML = `<img src="${escAttr(p.banner)}" alt="${escAttr(p.name)}">`;
   else          box.innerHTML = fallbackBannerSVG(p, currentPrize, cartela);
 
-  // Organizador: previa do mesmo banner
   document.getElementById('orgBannerPreview').src =
     p.banner || svgUri(fallbackBannerSVG(p, currentPrize, cartela));
 }
@@ -495,8 +579,8 @@ function render() {
 
 function setTab(t) {
   document.querySelectorAll('.tab').forEach(b => {
-    const isActive = (t === 'org' && b.textContent === 'Organizador') ||
-                     (t === 'screen' && b.textContent === 'Modo Telao');
+    const isActive = (t === 'org' && b.textContent.trim() === 'Organizador') ||
+                     (t === 'screen' && b.textContent.trim() === 'Modo Telão');
     b.classList.toggle('active', isActive);
   });
   document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + t));

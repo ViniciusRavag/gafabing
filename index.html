@@ -2,7 +2,8 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#F8811C">
 <title>Bingo GAFA - Controle de Sorteio</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/montserrat@latest/latin-400.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/montserrat@latest/latin-600.css">
@@ -10,240 +11,380 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/montserrat@latest/latin-800.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/fontsource/css/montserrat@latest/latin-900.css">
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { height: 100%; }
-body {
-  font-family: "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-  background: #f0f0f0; color: #1a1a1a;
+:root{
+  --brand:#F8811C;
+  --brand-dark:#c56200;
+  --ink:#1a1a1a;
+  --tabbar-h:54px;
+  --radius:12px;
 }
-#bingo-app { width: 100%; height: 100vh; height: 100dvh; display: flex; flex-direction: column; }
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{
+  font-family:"Montserrat",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  background:#f0f0f0;color:var(--ink);
+  -webkit-text-size-adjust:100%;
+}
+button,select,input{font-family:inherit;}
+button{touch-action:manipulation;cursor:pointer;}
+img,svg{max-width:100%;}
 
-/* ================= ABAS ================= */
-.tabbar { display: flex; border-bottom: 2px solid #1a1a1a; flex-shrink: 0; background: #fff; }
-.tab { flex: 1; padding: 14px 24px; border: none; background: #e8e8e8; cursor: pointer; color: #666; font-weight: 700; font-size: 15px; transition: all .15s; text-transform: uppercase; letter-spacing: 1px; font-family: inherit; }
-.tab:hover { background: #ddd; }
-.tab.active { background: #F8811C; color: #fff; }
+#bingo-app{
+  width:100%;
+  height:100vh;
+  height:100dvh;
+  display:flex;flex-direction:column;overflow:hidden;
+}
 
-.panel { display: none; flex: 1; min-height: 0; overflow: hidden; }
-.panel.active { display: flex; }
+/* ================= ABAS PRINCIPAIS ================= */
+.tabbar{
+  display:flex;flex-shrink:0;background:#fff;
+  border-bottom:2px solid var(--ink);
+  padding-top:env(safe-area-inset-top);
+}
+.tab{
+  flex:1;min-height:var(--tabbar-h);
+  padding:12px 8px;border:none;background:#e8e8e8;color:#666;
+  font-weight:700;font-size:14px;text-transform:uppercase;letter-spacing:1px;
+  transition:background .15s,color .15s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.tab + .tab{border-left:2px solid var(--ink);}
+.tab:hover{background:#ddd;}
+.tab.active{background:var(--brand);color:#fff;}
+.tab:active{transform:scale(.99);}
+
+.panel{display:none;flex:1;min-height:0;overflow:hidden;}
+.panel.active{display:flex;}
 
 /* ================================================================
    ===== PAINEL ORGANIZADOR =====
    ================================================================ */
-#panel-org { flex-direction: row; }
-.org-left, .org-right { padding: 20px; overflow: hidden; display: flex; flex-direction: column; }
-.org-left { flex: 1; min-width: 0; gap: 16px; overflow-y: auto; }
-.org-right { flex: 1; min-width: 0; gap: 10px; background: #fff; border-left: 2px solid #ddd; }
+#panel-org.active{flex-direction:row;}
 
-.card { background: #fff; border: 1px solid #ddd; border-radius: 12px; padding: 18px; flex-shrink: 0; }
-.card-title { font-size: 13px; color: #888; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 12px; }
-
-.row { display: flex; gap: 10px; align-items: center; }
-.row label { font-size: 13px; color: #555; min-width: 90px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; }
-.row select { flex: 1; padding: 10px 12px; border-radius: 8px; border: 1.5px solid #ccc; background: #fff; font-size: 14px; cursor: pointer; font-family: inherit; }
-
-.prizebox { text-align: center; padding: 16px; border-radius: 10px; background: #fff8f1; border: 2px dashed #F8811C; margin-top: 12px; }
-.prizebox h2 { margin: 0; font-size: 17px; font-weight: 700; color: #1a1a1a; line-height: 1.3; }
-.org-banner-preview { width: 100%; max-width: 440px; height: auto; display: block; margin: 12px auto 0; background: #fff; border: 1px solid #eee; border-radius: 10px; }
-
-.ctrl { display: flex; gap: 8px; flex-wrap: wrap; }
-.ctrl button { flex: 1; min-width: 120px; padding: 14px 18px; border-radius: 10px; border: 2px solid #ddd; background: #fff; cursor: pointer; font-weight: 700; font-size: 14px; transition: all .12s; text-transform: uppercase; letter-spacing: .5px; font-family: inherit; }
-.ctrl button:hover { background: #fff4ea; border-color: #F8811C; }
-.ctrl button.warn { background: #fef2f2; color: #dc2626; border-color: #dc2626; }
-.ctrl button.warn:hover { background: #fee2e2; }
-
-.bigball-wrap { display: flex; align-items: center; gap: 20px; }
-.bigball {
-  width: 104px; height: 104px; border-radius: 50%;
-  background: radial-gradient(circle at 32% 28%, #ffd9a6, #fb9a3e 35%, #F8811C 62%, #c56200 100%);
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 10px 20px rgba(0,0,0,.28), inset -6px -10px 16px rgba(0,0,0,.15);
-  animation: pop .35s cubic-bezier(.34,1.56,.64,1); flex-shrink: 0;
+.org-left,.org-right{
+  padding:20px;display:flex;flex-direction:column;min-width:0;
+  overscroll-behavior:contain;
 }
-.bb-disc { width: 66%; aspect-ratio: 1; border-radius: 50%; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; }
-.bigball-letter { font-size: 12px; font-weight: 800; color: #e07000; letter-spacing: 2px; line-height: 1; }
-.bigball-number { font-size: 30px; font-weight: 800; color: #111; line-height: 1; font-variant-numeric: tabular-nums; }
-.bigball-info { display: flex; flex-direction: column; gap: 4px; }
-.bigball-info .lbl { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
-.bigball-info .cnt { font-size: 14px; color: #888; font-weight: 600; }
-@keyframes pop { 0%{transform:scale(.5)} 70%{transform:scale(1.1)} 100%{transform:scale(1)} }
+.org-left{flex:1;gap:16px;overflow-y:auto;padding-bottom:calc(20px + env(safe-area-inset-bottom));}
+.org-right{flex:1;gap:10px;background:#fff;border-left:2px solid #ddd;overflow:hidden;}
 
-.hist-wrap { flex: 1; min-height: 0; display: flex; flex-direction: column; }
-.hist-title { font-size: 13px; color: #888; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-bottom: 8px; }
-.hist { display: flex; flex-wrap: wrap; gap: 5px; overflow-y: auto; align-content: flex-start; }
-.hist span { padding: 5px 10px; border-radius: 6px; background: #eee; font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.hist span.recent { background: #F8811C; color: #fff; }
+.card{background:#fff;border:1px solid #ddd;border-radius:var(--radius);padding:18px;flex-shrink:0;}
+.card-title{font-size:13px;color:#888;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:12px;}
 
-.grid-labels { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
-.grid-labels div { text-align: center; font-size: 22px; font-weight: 800; padding: 8px; background: #1a1a1a; color: #fff; border-radius: 8px; }
-.grid75 { display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(15, 1fr); grid-auto-flow: column; gap: 5px; flex: 1; min-height: 0; overflow-y: auto; }
-.grid-cell { display: flex; align-items: center; justify-content: center; border-radius: 6px; border: 1.5px solid #e0e0e0; background: #f8f8f8; color: #444; font-weight: 700; font-size: 15px; font-variant-numeric: tabular-nums; cursor: pointer; transition: background .12s, transform .1s; user-select: none; }
-.grid-cell:not(.called):hover { background: #ffe8d1; border-color: #F8811C; }
-.grid-cell:not(.called):active { transform: scale(.94); }
-.grid-cell.called { background: #F8811C; color: #fff; border-color: #F8811C; cursor: default; }
-.grid-cell.latest { box-shadow: 0 0 0 3px #1a1a1a; }
-
-/* ================================================================
-   ===== MODO TELAO - fundo laranja #F8811C =====
-   ================================================================ */
-#panel-screen { flex-direction: row; position: relative; background: #F8811C; color: #1a1a1a; overflow: hidden; }
-
-#panel-screen::before { content: ""; position: absolute; z-index: 0; left: clamp(34px, 3vw, 70px); top: clamp(1px, 1vh, 1px); bottom: 0; width: clamp(6px, .55vw, 12px); background: #fff; }
-#panel-screen::after { content: ""; position: absolute; z-index: 0; left: calc(-1 * clamp(1px, 5vw, 12px)); top: calc(-1 * clamp(1px, 2vh, 1px)); width: clamp(220px, 17vw, 400px); height: clamp(7px, 6.5vh, 2px); background: #fff; transform: rotate(-22deg); }
-
-.deco { position: absolute; z-index: 1; pointer-events: none; filter: drop-shadow(0 12px 16px rgba(0,0,0,.30)); }
-.deco svg { display: block; width: 100%; height: auto; }
-.deco-1 { width: clamp(46px, 4.5vw, 102px); top: -2%; left: 41.4%; transform: rotate(14deg); }
-.deco-2 { width: clamp(84px, 8.4vw, 190px); top: 4%;  left: 42.4%; transform: rotate(-9deg); }
-.deco-3 { width: clamp(84px, 8vw, 176px);   top: 51%; left: -3.2%; transform: rotate(7deg) scaleX(-1); }
-
-.screen-left, .screen-right { overflow: hidden; display: flex; flex-direction: column; position: relative; z-index: 2; }
-.screen-left { flex: 1; min-width: 0; padding: clamp(18px, 3vh, 40px) clamp(20px, 3.4vw, 44px) clamp(18px, 3vh, 40px) clamp(56px, 6vw, 120px); justify-content: center; gap: clamp(10px, 2.2vh, 26px); }
-.screen-right { flex: 1.08; min-width: 0; padding: clamp(18px, 3.4vh, 42px) clamp(20px, 2.2vw, 42px) clamp(18px, 3.4vh, 42px) 0; justify-content: center; }
-
-/* ----- Logos ----- */
-.screen-logos { display: flex; flex-direction: column; align-items: flex-start; gap: clamp(8px, 1.4vh, 18px); }
-.logo-acif { display: flex; align-items: center; gap: clamp(8px, .8vw, 16px); color: #fff; font-weight: 800; font-size: clamp(16px, 1.65vw, 36px); letter-spacing: .5px; line-height: 1; }
-.logo-acif i { width: 3px; height: 1.05em; background: #fff; display: block; border-radius: 2px; }
-
-.logo-bingo { width: clamp(130px, 17vw, 500px); }
-.logo-bingo img, .logo-bingo svg { display: block; width: 100%; height: auto; filter: drop-shadow(0 2px 6px rgba(0,0,0,.16)); }
-
-/* ----- Circulo do ultimo numero ----- */
-.lastnumber-circle { align-self: center; width: min(40vh, 25vw); aspect-ratio: 1; border-radius: 50%; background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(6px, 1.4vh, 16px); text-align: center; flex-shrink: 0; box-shadow: 0 16px 40px rgba(0,0,0,.20); animation: pop .4s cubic-bezier(.34,1.56,.64,1); }
-.ln-label { font-size: clamp(12px, 1.45vw, 26px); letter-spacing: .12em; color: #222; font-weight: 600; }
-.ln-value { font-size: clamp(46px, 6.4vw, 118px); font-weight: 800; color: #0d0d0d; line-height: 1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
-.ln-sorteado { font-size: clamp(12px, 1.45vw, 26px); letter-spacing: .18em; color: #222; font-weight: 600; }
-
-/* Area do premio */
-.prize-banner { position: relative; z-index: 1; }
-.prize-banner img, .prize-banner svg { display: block; width: 100%; height: auto; max-height: 36vh; object-fit: contain; border-radius: 16px; background: transparent; }
-
-/* ----- Cartao branco com a grade ----- */
-.screen-grid-card { background: #fff; border-radius: 22px; padding: clamp(16px, 2.4vh, 30px) clamp(16px, 1.8vw, 28px); flex: 1; display: flex; flex-direction: column; min-height: 0; box-shadow: 0 14px 40px rgba(0,0,0,.22); }
-.screen-grid { display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(15, 1fr); grid-auto-flow: column; gap: clamp(5px, .9vh, 10px); flex: 1; min-height: 0; }
-.screen-grid .sgCell { display: flex; align-items: center; justify-content: center; font-size: clamp(10px, 1.05vw, 16px); border-radius: 7px; background: #d9d9d9; font-weight: 600; font-variant-numeric: tabular-nums; color: #9c9c9c; transition: background .15s, color .15s; }
-.screen-grid .sgCell.on { background: #F8811C; color: #fff; font-weight: 800; }
-.screen-grid .sgCell.latestNew { box-shadow: 0 0 0 3px #111; }
-
-/* ================================================================
-   ===== RESPONSIVO - TABLET (max 900px) =====
-   ================================================================ */
-@media (max-width: 900px) {
-  #panel-org { flex-direction: column; overflow-y: auto; }
-  .org-left { overflow-y: visible; }
-  .org-right { border-left: none; border-top: 2px solid #ddd; min-height: 50vh; }
-  
-  #panel-screen { flex-direction: column; overflow-y: auto; }
-  #panel-screen::before, #panel-screen::after { display: none; }
-  .deco { display: none; }
-  .screen-left { padding: 24px 20px; align-items: center; }
-  .screen-right { padding: 0 20px 20px; }
-  .lastnumber-circle { width: min(210px, 40vw); }
-  .ln-value { font-size: clamp(36px, 10vw, 56px); }
-  .logo-bingo { width: clamp(160px, 40vw, 250px); }
-  .prize-banner img, .prize-banner svg { max-height: 180px; }
-  .screen-grid-card { min-height: 45vh; }
+.row{display:flex;gap:10px;align-items:center;}
+.row label{font-size:13px;color:#555;min-width:90px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;}
+.row select{
+  flex:1;min-width:0;padding:12px;border-radius:10px;border:1.5px solid #ccc;
+  background:#fff;font-size:15px;font-weight:600;color:var(--ink);
+  appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 12px center;background-size:16px;
+  padding-right:38px;
 }
 
-/* ================================================================
-   ===== RESPONSIVO - MOBILE (max 600px) =====
-   ================================================================ */
-@media (max-width: 600px) {
-  html, body { overflow: auto; }
-  #bingo-app { height: auto; min-height: 100vh; min-height: 100dvh; }
-  
-  /* Tabbar mobile */
-  .tab { padding: 12px 8px; font-size: 12px; letter-spacing: .5px; }
-  
-  /* Painel organizador mobile */
-  #panel-org { flex-direction: column; overflow-y: auto; }
-  .org-left { padding: 12px; gap: 12px; overflow-y: visible; }
-  .org-right { border-left: none; border-top: 2px solid #ddd; padding: 12px; min-height: 55vh; }
-  
-  .card { padding: 14px; border-radius: 10px; }
-  .card-title { font-size: 11px; margin-bottom: 10px; }
-  
-  .row { flex-direction: column; align-items: stretch; gap: 6px; }
-  .row label { min-width: unset; font-size: 12px; }
-  .row select { padding: 12px; font-size: 15px; }
-  
-  .prizebox { padding: 12px; margin-top: 10px; }
-  .prizebox h2 { font-size: 15px; }
-  .org-banner-preview { max-width: 100%; margin-top: 8px; }
-  
-  .ctrl { flex-direction: column; }
-  .ctrl button { min-width: unset; padding: 14px; font-size: 13px; }
-  
-  .bigball-wrap { gap: 14px; }
-  .bigball { width: 80px; height: 80px; }
-  .bigball-number { font-size: 24px; }
-  .bigball-letter { font-size: 10px; }
-  .bigball-info .lbl { font-size: 11px; }
-  .bigball-info .cnt { font-size: 13px; }
-  
-  .hist-wrap { min-height: 120px; }
-  .hist { max-height: 150px; }
-  .hist span { padding: 4px 8px; font-size: 12px; }
-  
-  /* Grid mobile */
-  .grid-labels div { font-size: 16px; padding: 6px; border-radius: 6px; }
-  .grid-labels { gap: 4px; }
-  .grid75 { gap: 3px; }
-  .grid-cell { font-size: 12px; border-radius: 4px; border-width: 1px; }
-  
-  /* Painel telao mobile */
-  #panel-screen { flex-direction: column; overflow-y: auto; }
-  #panel-screen::before, #panel-screen::after { display: none; }
-  .deco { display: none; }
-  .screen-left { padding: 16px 14px; gap: 14px; align-items: center; }
-  .screen-right { padding: 0 14px 14px; }
-  
-  .screen-logos { align-items: center; }
-  .logo-bingo { width: clamp(140px, 50vw, 220px); }
-  
-  .lastnumber-circle { width: min(180px, 45vw); gap: 6px; }
-  .ln-label { font-size: clamp(10px, 3vw, 14px); letter-spacing: .08em; }
-  .ln-value { font-size: clamp(32px, 10vw, 48px); }
-  .ln-sorteado { font-size: clamp(10px, 3vw, 14px); letter-spacing: .1em; }
-  
-  .prize-banner img, .prize-banner svg { max-height: 140px; border-radius: 10px; }
-  
-  .screen-grid-card { border-radius: 14px; padding: 10px; min-height: 50vh; }
-  .screen-grid { gap: 3px; }
-  .screen-grid .sgCell { font-size: clamp(9px, 2.5vw, 13px); border-radius: 4px; }
+.prizebox{text-align:center;padding:16px;border-radius:10px;background:#fff8f1;border:2px dashed var(--brand);margin-top:12px;}
+.prizebox h2{margin:0;font-size:17px;font-weight:700;color:var(--ink);line-height:1.3;}
+.org-banner-preview{width:100%;max-width:440px;height:auto;display:block;margin:12px auto 0;background:#fff;border:1px solid #eee;border-radius:10px;}
+
+.ctrl{display:flex;gap:10px;flex-wrap:wrap;}
+.ctrl button{
+  flex:1 1 140px;min-height:52px;padding:14px 18px;border-radius:10px;
+  border:2px solid #ddd;background:#fff;font-weight:700;font-size:14px;
+  text-transform:uppercase;letter-spacing:.5px;transition:background .12s,border-color .12s,transform .08s;
+}
+.ctrl button:hover{background:#fff4ea;border-color:var(--brand);}
+.ctrl button:active{transform:scale(.98);}
+.ctrl button:disabled{opacity:.4;cursor:not-allowed;}
+.ctrl button.warn{background:#fef2f2;color:#dc2626;border-color:#dc2626;}
+.ctrl button.warn:hover{background:#fee2e2;}
+
+.bigball-wrap{display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.bigball{
+  width:104px;height:104px;border-radius:50%;
+  background:radial-gradient(circle at 32% 28%,#ffd9a6,#fb9a3e 35%,var(--brand) 62%,var(--brand-dark) 100%);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  box-shadow:0 10px 20px rgba(0,0,0,.28),inset -6px -10px 16px rgba(0,0,0,.15);
+}
+.bigball.empty{background:radial-gradient(circle at 32% 28%,#f2f2f2,#dcdcdc 40%,#c4c4c4 100%);}
+.bigball.pop{animation:pop .35s cubic-bezier(.34,1.56,.64,1);}
+.bb-disc{width:66%;aspect-ratio:1;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;}
+.bigball-letter{font-size:12px;font-weight:800;color:#e07000;letter-spacing:2px;line-height:1;}
+.bigball-number{font-size:30px;font-weight:800;color:#111;line-height:1;font-variant-numeric:tabular-nums;}
+.bigball-info{display:flex;flex-direction:column;gap:4px;min-width:0;}
+.bigball-info .lbl{font-size:12px;color:#888;text-transform:uppercase;letter-spacing:1px;font-weight:700;}
+.bigball-info .cnt{font-size:14px;color:#888;font-weight:600;}
+@keyframes pop{0%{transform:scale(.5)}70%{transform:scale(1.1)}100%{transform:scale(1)}}
+
+.hist-wrap{flex:1;min-height:120px;display:flex;flex-direction:column;}
+.hist-title{font-size:13px;color:#888;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:8px;}
+.hist{display:flex;flex-wrap:wrap;gap:6px;overflow-y:auto;align-content:flex-start;min-height:40px;}
+.hist span{padding:7px 11px;border-radius:8px;background:#eee;font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;}
+.hist span.recent{background:var(--brand);color:#fff;}
+.hist .empty-hint{background:none;color:#aaa;font-weight:600;padding:7px 2px;}
+
+/* ---- Cabeçalho da grade (sticky no mobile) ---- */
+.org-grid-head{flex-shrink:0;display:flex;flex-direction:column;gap:10px;}
+
+.m-summary{display:none;}
+
+.grid-labels{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;}
+.grid-labels div{
+  text-align:center;font-size:22px;font-weight:800;padding:8px 0;min-height:40px;
+  background:var(--ink);color:#fff;border-radius:8px;display:flex;align-items:center;justify-content:center;
 }
 
+.grid75{
+  display:grid;grid-template-columns:repeat(5,1fr);
+  grid-template-rows:repeat(15,minmax(26px,1fr));
+  grid-auto-flow:column;gap:6px;flex:1;min-height:0;overflow-y:auto;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.grid-cell{
+  display:flex;align-items:center;justify-content:center;
+  border-radius:8px;border:2px solid #e0e0e0;background:#f8f8f8;color:#444;
+  font-weight:800;font-size:16px;font-variant-numeric:tabular-nums;
+  cursor:pointer;user-select:none;-webkit-user-select:none;
+  transition:background .12s,transform .08s,border-color .12s,color .12s;
+}
+.grid-cell:not(.called):hover{background:#ffe8d1;border-color:var(--brand);}
+.grid-cell:not(.called):active{transform:scale(.93);background:#ffd7ac;}
+.grid-cell.called{background:var(--brand);color:#fff;border-color:var(--brand);}
+.grid-cell.latest{box-shadow:0 0 0 3px var(--ink);z-index:1;}
+
 /* ================================================================
-   ===== RESPONSIVO - MOBILE PEQUENO (max 380px) =====
+   ===== MODO TELÃO =====
    ================================================================ */
-@media (max-width: 380px) {
-  .tab { padding: 10px 6px; font-size: 11px; }
-  .org-left { padding: 10px; gap: 10px; }
-  .org-right { padding: 10px; }
-  .card { padding: 12px; }
-  .bigball { width: 68px; height: 68px; }
-  .bigball-number { font-size: 20px; }
-  .bigball-letter { font-size: 9px; }
-  .grid-cell { font-size: 11px; }
-  .grid-labels div { font-size: 14px; padding: 5px; }
-  .lastnumber-circle { width: 150px; }
-  .ln-value { font-size: 36px; }
-  .screen-grid .sgCell { font-size: 9px; }
+#panel-screen.active{flex-direction:row;position:relative;background:var(--brand);color:var(--ink);overflow:hidden;}
+#panel-screen::before{content:"";position:absolute;z-index:0;left:clamp(34px,3vw,70px);top:clamp(1px,1vh,1px);bottom:0;width:clamp(6px,.55vw,12px);background:#fff;}
+#panel-screen::after{content:"";position:absolute;z-index:0;left:calc(-1 * clamp(1px,5vw,12px));top:calc(-1 * clamp(1px,2vh,1px));width:clamp(220px,17vw,400px);height:clamp(7px,6.5vh,2px);background:#fff;transform:rotate(-22deg);}
+
+.deco{position:absolute;z-index:1;pointer-events:none;filter:drop-shadow(0 12px 16px rgba(0,0,0,.30));}
+.deco svg{display:block;width:100%;height:auto;}
+.deco-1{width:clamp(46px,4.5vw,102px);top:-2%;left:41.4%;transform:rotate(14deg);}
+.deco-2{width:clamp(84px,8.4vw,190px);top:4%;left:42.4%;transform:rotate(-9deg);}
+.deco-3{width:clamp(84px,8vw,176px);top:51%;left:-3.2%;transform:rotate(7deg) scaleX(-1);}
+
+.screen-left,.screen-right{overflow:hidden;display:flex;flex-direction:column;position:relative;z-index:2;min-width:0;}
+.screen-left{flex:1;padding:clamp(18px,3vh,40px) clamp(20px,3.4vw,44px) clamp(18px,3vh,40px) clamp(56px,6vw,120px);justify-content:center;gap:clamp(10px,2.2vh,26px);}
+.screen-right{flex:1.08;padding:clamp(18px,3.4vh,42px) clamp(20px,2.2vw,42px) clamp(18px,3.4vh,42px) 0;justify-content:center;}
+
+.screen-logos{display:flex;flex-direction:column;align-items:flex-start;gap:clamp(8px,1.4vh,18px);}
+.logo-bingo{width:clamp(130px,17vw,500px);}
+.logo-bingo img,.logo-bingo svg{display:block;width:100%;height:auto;filter:drop-shadow(0 2px 6px rgba(0,0,0,.16));}
+
+.lastnumber-circle{
+  align-self:center;width:min(40vh,25vw);aspect-ratio:1;border-radius:50%;background:#fff;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:clamp(4px,1.2vh,14px);text-align:center;flex-shrink:0;
+  box-shadow:0 16px 40px rgba(0,0,0,.20);
+}
+.lastnumber-circle.pop{animation:pop .4s cubic-bezier(.34,1.56,.64,1);}
+.ln-label{font-size:clamp(11px,1.45vw,26px);letter-spacing:.12em;color:#222;font-weight:600;}
+.ln-value{font-size:clamp(40px,6.4vw,118px);font-weight:800;color:#0d0d0d;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums;}
+.ln-sorteado{font-size:clamp(11px,1.45vw,26px);letter-spacing:.18em;color:#222;font-weight:600;}
+
+.prize-banner{position:relative;z-index:1;width:100%;}
+.prize-banner img,.prize-banner svg{display:block;width:100%;height:auto;max-height:36vh;object-fit:contain;border-radius:16px;background:transparent;}
+
+.screen-grid-card{background:#fff;border-radius:22px;padding:clamp(14px,2.4vh,30px) clamp(14px,1.8vw,28px);flex:1;display:flex;flex-direction:column;min-height:0;box-shadow:0 14px 40px rgba(0,0,0,.22);}
+.screen-grid{display:grid;grid-template-columns:repeat(5,1fr);grid-template-rows:repeat(15,minmax(0,1fr));grid-auto-flow:column;gap:clamp(4px,.9vh,10px);flex:1;min-height:0;}
+.screen-grid .sgCell{display:flex;align-items:center;justify-content:center;font-size:clamp(9px,1.05vw,16px);border-radius:7px;background:#d9d9d9;font-weight:600;font-variant-numeric:tabular-nums;color:#9c9c9c;transition:background .15s,color .15s;}
+.screen-grid .sgCell.on{background:var(--brand);color:#fff;font-weight:800;}
+.screen-grid .sgCell.latestNew{box-shadow:0 0 0 3px #111;}
+
+/* ================= MODAL ================= */
+.modal-backdrop{
+  position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.55);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+  opacity:0;pointer-events:none;transition:opacity .18s;
+}
+.modal-backdrop.open{opacity:1;pointer-events:auto;}
+.modal{
+  background:#fff;border-radius:18px;padding:24px;width:100%;max-width:420px;
+  box-shadow:0 24px 60px rgba(0,0,0,.4);
+  transform:translateY(14px) scale(.96);transition:transform .22s cubic-bezier(.34,1.4,.64,1);
+}
+.modal-backdrop.open .modal{transform:none;}
+.modal h3{font-size:19px;font-weight:800;margin-bottom:8px;}
+.modal p{font-size:14px;color:#555;line-height:1.5;margin-bottom:20px;}
+.modal-actions{display:flex;gap:10px;flex-wrap:wrap;}
+.m-btn{
+  flex:1 1 150px;min-height:52px;border-radius:12px;border:2px solid #ddd;background:#fff;
+  font-weight:700;font-size:14px;text-transform:uppercase;letter-spacing:.5px;transition:all .12s;
+}
+.m-btn:active{transform:scale(.98);}
+.m-btn.danger{background:#dc2626;border-color:#dc2626;color:#fff;}
+.m-btn.danger:hover{background:#b91c1c;}
+.m-btn.ghost:hover{background:#f4f4f4;}
+
+/* ================================================================
+   ===== SUB-NAVEGAÇÃO (somente mobile) =====
+   ================================================================ */
+.subnav{display:none;}
+.subtab{
+  flex:1;min-height:46px;border-radius:10px;border:2px solid #e2e2e2;background:#f4f4f4;
+  font-weight:700;font-size:14px;color:#777;text-transform:uppercase;letter-spacing:.5px;
+  transition:all .15s;display:flex;align-items:center;justify-content:center;gap:7px;
+}
+.subtab.active{background:var(--brand);border-color:var(--brand);color:#fff;box-shadow:0 4px 12px rgba(248,129,28,.35);}
+
+/* ================================================================
+   ===== RESPONSIVO — TABLET / MOBILE =====
+   ================================================================ */
+@media (max-width:900px){
+  :root{--tabbar-h:50px;}
+
+  .tab{font-size:12.5px;letter-spacing:.6px;}
+
+  /* Sub-navegação do organizador */
+  .subnav{
+    display:flex;gap:8px;padding:10px 12px;background:#fff;
+    border-bottom:1px solid #e3e3e3;flex-shrink:0;
+  }
+
+  #panel-org.active{flex-direction:column;}
+  .org-left,.org-right{display:none;flex:1;min-height:0;overflow-y:auto;padding:12px;}
+  #panel-org[data-view="ctrl"] .org-left,
+  #panel-org[data-view="nums"] .org-right{display:flex;}
+  .org-left{gap:12px;background:#f0f0f0;padding-bottom:calc(16px + env(safe-area-inset-bottom));}
+  .org-right{border-left:none;background:#fff;padding-bottom:calc(16px + env(safe-area-inset-bottom));}
+
+  .card{padding:14px;border-radius:14px;}
+  .card-title{font-size:12px;margin-bottom:10px;}
+
+  .row{flex-direction:column;align-items:stretch;gap:6px;}
+  .row label{min-width:0;font-size:12px;}
+  .row select{width:100%;font-size:16px;padding:14px 38px 14px 12px;}
+
+  .prizebox{padding:12px;}
+  .prizebox h2{font-size:15px;}
+
+  .ctrl button{flex:1 1 100%;min-height:56px;font-size:15px;}
+
+  .bigball-wrap{justify-content:center;gap:16px;}
+  .bigball{width:92px;height:92px;}
+  .bigball-number{font-size:27px;}
+  .bigball-info{align-items:center;text-align:center;}
+
+  .hist{max-height:none;}
+  .hist span{font-size:14px;padding:8px 12px;}
+  .hist-wrap{min-height:0;flex:0 0 auto;}
+
+  /* Barra resumo fixa + rótulos */
+  .org-grid-head{
+    position:sticky;top:0;z-index:20;background:#fff;
+    margin:-12px -12px 12px;padding:10px 12px 8px;
+    box-shadow:0 8px 18px rgba(0,0,0,.08);gap:8px;
+  }
+  .m-summary{display:flex;align-items:center;gap:10px;}
+  .m-ball{
+    width:56px;height:56px;border-radius:50%;flex-shrink:0;
+    background:radial-gradient(circle at 32% 28%,#ffd9a6,#fb9a3e 35%,var(--brand) 62%,var(--brand-dark) 100%);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 10px rgba(0,0,0,.22),inset -3px -5px 8px rgba(0,0,0,.15);
+  }
+  .m-ball.empty{background:radial-gradient(circle at 32% 28%,#f5f5f5,#dcdcdc 45%,#c2c2c2 100%);box-shadow:0 3px 8px rgba(0,0,0,.15);}
+  .m-ball.pop{animation:pop .35s cubic-bezier(.34,1.56,.64,1);}
+  .m-ball-inner{width:68%;aspect-ratio:1;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;gap:1px;}
+  .m-ball-letter{font-size:9px;font-weight:800;color:#e07000;letter-spacing:1.5px;}
+  .m-ball-num{font-size:18px;font-weight:800;color:#111;font-variant-numeric:tabular-nums;}
+  .m-meta{
+    flex:1;min-width:0;text-align:left;background:none;border:none;padding:2px 0;
+    display:flex;flex-direction:column;gap:2px;
+  }
+  .m-prize{
+    font-size:13px;font-weight:700;color:var(--ink);line-height:1.25;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  }
+  .m-count{font-size:11.5px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.4px;}
+  .m-count b{color:var(--brand);}
+  .m-undo{
+    flex-shrink:0;min-height:46px;padding:0 14px;border-radius:11px;
+    border:2px solid #ddd;background:#fff;color:#444;
+    font-weight:700;font-size:13px;display:flex;align-items:center;gap:6px;
+    transition:all .12s;
+  }
+  .m-undo:active{transform:scale(.95);background:#f4f4f4;}
+  .m-undo:disabled{opacity:.35;}
+  .m-undo svg{width:16px;height:16px;flex-shrink:0;}
+
+  .grid-labels,.grid75{width:100%;max-width:540px;margin-inline:auto;}
+  .grid-labels{gap:7px;}
+  .grid-labels div{font-size:clamp(15px,4.2vw,20px);min-height:34px;padding:6px 0;border-radius:9px;}
+
+  /* ===== BOTÕES DE NÚMERO GRANDES ===== */
+  .grid75{
+    flex:0 0 auto;overflow:visible;min-height:0;
+    grid-template-rows:repeat(15,auto);gap:7px;
+  }
+  .grid-cell{
+    aspect-ratio:1/1;min-height:52px;
+    border-radius:13px;border-width:2px;
+    font-size:clamp(17px,4.8vw,23px);font-weight:800;
+    box-shadow:0 2px 0 rgba(0,0,0,.05);
+  }
+  .grid-cell.called{box-shadow:0 2px 0 rgba(197,98,0,.55);}
+  .grid-cell.latest{box-shadow:0 0 0 4px var(--ink);}
+
+  /* ===== TELÃO MOBILE ===== */
+  #panel-screen.active{flex-direction:column;overflow-y:auto;overscroll-behavior:contain;}
+  #panel-screen::before,#panel-screen::after,.deco{display:none;}
+  .screen-left{flex:0 0 auto;padding:18px 16px 14px;gap:14px;align-items:center;}
+  .screen-logos{align-items:center;width:100%;}
+  .logo-bingo{width:min(72vw,330px);}
+  .lastnumber-circle{width:min(48vw,210px);gap:4px;}
+  .ln-label,.ln-sorteado{font-size:clamp(9px,2.9vw,13px);}
+  .ln-value{font-size:clamp(38px,13vw,62px);}
+  .prize-banner img,.prize-banner svg{max-height:26vh;border-radius:12px;}
+  .screen-right{flex:0 0 auto;padding:0 12px calc(20px + env(safe-area-inset-bottom));width:100%;}
+  .screen-grid-card{border-radius:18px;padding:12px;}
+  .screen-grid{grid-template-rows:repeat(15,minmax(21px,auto));gap:5px;flex:0 0 auto;}
+  .screen-grid .sgCell{aspect-ratio:auto;min-height:21px;border-radius:6px;font-size:clamp(10px,2.9vw,14px);}
 }
 
-/* Landscape mobile */
-@media (max-height: 500px) and (orientation: landscape) {
-  #panel-screen { flex-direction: row; overflow: hidden; }
-  .screen-left { flex: 1; padding: 12px 16px; gap: 8px; }
-  .screen-right { flex: 1.2; padding: 12px 16px 12px 0; }
-  .lastnumber-circle { width: min(28vh, 140px); }
-  .ln-value { font-size: clamp(28px, 5vh, 42px); }
-  .logo-bingo { width: clamp(100px, 18vh, 180px); }
-  .prize-banner img, .prize-banner svg { max-height: 20vh; }
-  .screen-grid-card { min-height: unset; }
-  #panel-screen::before, #panel-screen::after { display: block; }
-  .deco { display: block; }
+/* Telão em paisagem no celular */
+@media (max-width:900px) and (orientation:landscape){
+  #panel-screen.active{flex-direction:row;overflow:hidden;}
+  .screen-left{flex:1;padding:10px 14px;gap:8px;align-items:stretch;}
+  .screen-logos{align-items:flex-start;}
+  .logo-bingo{width:min(24vw,180px);}
+  .lastnumber-circle{width:min(26vh,150px);align-self:center;}
+  .ln-value{font-size:clamp(26px,5.4vh,44px);}
+  .prize-banner img,.prize-banner svg{max-height:15vh;}
+  .screen-right{flex:1.15;padding:10px 12px 10px 0;}
+  .screen-grid-card{padding:10px;}
+  .screen-grid{grid-template-rows:repeat(15,minmax(0,1fr));flex:1;gap:3px;}
+  .screen-grid .sgCell{min-height:0;font-size:clamp(7px,1.35vw,12px);border-radius:4px;}
+}
+
+/* Telas muito pequenas */
+@media (max-width:380px){
+  .m-undo span{display:none;}
+  .m-undo{padding:0 12px;}
+  .grid75{gap:5px;}
+  .grid-labels{gap:5px;}
+  .bigball{width:80px;height:80px;}
+  .bigball-number{font-size:24px;}
+}
+
+/* Tablets em modo retrato intermediário */
+@media (min-width:601px) and (max-width:900px){
+  .ctrl button{flex:1 1 45%;}
+}
+
+/* Paisagem baixa — abas mais compactas */
+@media (max-height:480px) and (orientation:landscape){
+  :root{--tabbar-h:40px;}
+  .tab{font-size:11px;padding:8px 6px;}
+  .subnav{padding:6px 10px;}
+  .subtab{min-height:36px;font-size:12px;}
+}
+
+/* Acessibilidade: foco visível */
+:focus-visible{outline:3px solid #1a6fd4;outline-offset:2px;}
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms !important;transition-duration:.01ms !important;}
 }
 </style>
 <base target="_blank">
@@ -253,17 +394,30 @@ body {
 <div id="bingo-app">
 
   <div class="tabbar">
-    <button class="tab active" onclick="setTab('org')">Organizador</button>
-    <button class="tab" onclick="setTab('screen')">Modo Telão</button>
+    <button class="tab active" data-tab="org" onclick="setTab('org')">Organizador</button>
+    <button class="tab" data-tab="screen" onclick="setTab('screen')">Modo Telão</button>
   </div>
 
   <!-- ================= PAINEL ORGANIZADOR ================= -->
-  <div id="panel-org" class="panel active">
+  <div id="panel-org" class="panel active" data-view="nums">
+
+    <!-- Sub-navegação (visível apenas no mobile) -->
+    <nav class="subnav" aria-label="Seções do organizador">
+      <button class="subtab active" data-view="nums" onclick="setOrgView('nums')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        Números
+      </button>
+      <button class="subtab" data-view="ctrl" onclick="setOrgView('ctrl')">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg>
+        Rodada
+      </button>
+    </nav>
+
     <div class="org-left">
 
       <div class="card">
         <div class="card-title">Configuração da rodada</div>
-        <div class="row"><label>Prêmio:</label><select id="selPrize" onchange="updateRound()"></select></div>
+        <div class="row"><label for="selPrize">Prêmio:</label><select id="selPrize" onchange="updateRound()"></select></div>
         <div class="prizebox">
           <h2 id="roundDisplay"></h2>
           <img id="orgBannerPreview" class="org-banner-preview" src="" alt="Prévia do banner exibido no telão">
@@ -273,14 +427,14 @@ body {
       <div class="card">
         <div class="card-title">Controles</div>
         <div class="ctrl">
-          <button onclick="undoLast()">Desfazer</button>
+          <button data-undo onclick="undoLast()">↶ Desfazer</button>
           <button class="warn" onclick="newRound()">Nova Rodada</button>
         </div>
       </div>
 
       <div class="card">
         <div class="bigball-wrap">
-          <div class="bigball" id="lastBall">
+          <div class="bigball empty" id="lastBall">
             <div class="bb-disc">
               <div class="bigball-letter" id="lastLetterBall">-</div>
               <div class="bigball-number" id="lastNumberBall">-</div>
@@ -301,8 +455,26 @@ body {
     </div>
 
     <div class="org-right">
-      <div class="grid-labels"><div>B</div><div>I</div><div>N</div><div>G</div><div>O</div></div>
-      <div class="grid75" id="numGrid"></div>
+      <div class="org-grid-head">
+        <div class="m-summary">
+          <div class="m-ball empty" id="mBall">
+            <div class="m-ball-inner">
+              <span class="m-ball-letter" id="mLetter">-</span>
+              <span class="m-ball-num" id="mNumber">--</span>
+            </div>
+          </div>
+          <button class="m-meta" onclick="setOrgView('ctrl')" aria-label="Ver detalhes da rodada">
+            <span class="m-prize" id="mPrize">Selecione um prêmio</span>
+            <span class="m-count"><b id="mCount">0</b> / 75 sorteados</span>
+          </button>
+          <button class="m-undo" data-undo onclick="undoLast()" aria-label="Desfazer último número">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M3.5 13a9 9 0 1 0 2.3-6.4L3 9"/></svg>
+            <span>Desfazer</span>
+          </button>
+        </div>
+        <div class="grid-labels" aria-hidden="true"><div>B</div><div>I</div><div>N</div><div>G</div><div>O</div></div>
+      </div>
+      <div class="grid75" id="numGrid" role="group" aria-label="Números do bingo — toque para sortear"></div>
     </div>
   </div>
 
@@ -311,40 +483,26 @@ body {
 
     <span class="deco deco-1" aria-hidden="true">
       <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <radialGradient id="gb1" cx="35%" cy="30%" r="80%">
-      <stop offset="0%" stop-color="#ffe0b3"/>
-      <stop offset="35%" stop-color="#fb9a3e"/>
-      <stop offset="75%" stop-color="#F8811C"/>
-      <stop offset="100%" stop-color="#b95c00"/>
-    </radialGradient>
-  </defs>
-  <circle cx="50" cy="50" r="49" fill="url(#gb1)"/>
-  <ellipse cx="35" cy="24" rx="13" ry="8" fill="#fff" opacity=".35" transform="rotate(-18 35 24)"/>
-  <circle cx="48" cy="46" r="26" fill="#fff"/>
-  <text x="48" y="48" text-anchor="middle" dominant-baseline="central" font-family="Montserrat, Arial, sans-serif" font-weight="800" font-size="34" fill="#111">2</text>
-</svg>
+        <defs><radialGradient id="gbA" cx="35%" cy="30%" r="80%"><stop offset="0%" stop-color="#ffe0b3"/><stop offset="35%" stop-color="#fb9a3e"/><stop offset="75%" stop-color="#F8811C"/><stop offset="100%" stop-color="#b95c00"/></radialGradient></defs>
+        <circle cx="50" cy="50" r="49" fill="url(#gbA)"/>
+        <ellipse cx="35" cy="24" rx="13" ry="8" fill="#fff" opacity=".35" transform="rotate(-18 35 24)"/>
+        <circle cx="48" cy="46" r="26" fill="#fff"/>
+        <text x="48" y="48" text-anchor="middle" dominant-baseline="central" font-family="Montserrat, Arial, sans-serif" font-weight="800" font-size="34" fill="#111">2</text>
+      </svg>
     </span>
     <span class="deco deco-2" aria-hidden="true">
       <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <radialGradient id="gb2" cx="35%" cy="30%" r="80%">
-      <stop offset="0%" stop-color="#ffe0b3"/>
-      <stop offset="35%" stop-color="#fb9a3e"/>
-      <stop offset="75%" stop-color="#F8811C"/>
-      <stop offset="100%" stop-color="#b95c00"/>
-    </radialGradient>
-  </defs>
-  <circle cx="50" cy="50" r="49" fill="url(#gb2)"/>
-  <ellipse cx="35" cy="24" rx="13" ry="8" fill="#fff" opacity=".35" transform="rotate(-18 35 24)"/>
-  <circle cx="48" cy="46" r="26" fill="#fff"/>
-  <text x="48" y="48" text-anchor="middle" dominant-baseline="central" font-family="Montserrat, Arial, sans-serif" font-weight="800" font-size="34" fill="#111">3</text>
-</svg>
+        <defs><radialGradient id="gbB" cx="35%" cy="30%" r="80%"><stop offset="0%" stop-color="#ffe0b3"/><stop offset="35%" stop-color="#fb9a3e"/><stop offset="75%" stop-color="#F8811C"/><stop offset="100%" stop-color="#b95c00"/></radialGradient></defs>
+        <circle cx="50" cy="50" r="49" fill="url(#gbB)"/>
+        <ellipse cx="35" cy="24" rx="13" ry="8" fill="#fff" opacity=".35" transform="rotate(-18 35 24)"/>
+        <circle cx="48" cy="46" r="26" fill="#fff"/>
+        <text x="48" y="48" text-anchor="middle" dominant-baseline="central" font-family="Montserrat, Arial, sans-serif" font-weight="800" font-size="34" fill="#111">3</text>
+      </svg>
     </span>
     <span class="deco deco-3" aria-hidden="true">
       <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-        <defs><radialGradient id="gb4" cx="35%" cy="30%" r="80%"><stop offset="0%" stop-color="#ffe0b3"/><stop offset="35%" stop-color="#fb9a3e"/><stop offset="75%" stop-color="#F8811C"/><stop offset="100%" stop-color="#b95c00"/></radialGradient></defs>
-        <circle cx="50" cy="50" r="49" fill="url(#gb4)"/>
+        <defs><radialGradient id="gbC" cx="35%" cy="30%" r="80%"><stop offset="0%" stop-color="#ffe0b3"/><stop offset="35%" stop-color="#fb9a3e"/><stop offset="75%" stop-color="#F8811C"/><stop offset="100%" stop-color="#b95c00"/></radialGradient></defs>
+        <circle cx="50" cy="50" r="49" fill="url(#gbC)"/>
         <ellipse cx="35" cy="24" rx="13" ry="8" fill="#fff" opacity=".35" transform="rotate(-18 35 24)"/>
         <ellipse cx="86" cy="56" rx="9" ry="14" fill="#fff" transform="rotate(16 86 56)"/>
         <circle cx="48" cy="46" r="26" fill="#fff"/>
@@ -352,21 +510,18 @@ body {
       </svg>
     </span>
 
-
     <div class="screen-left">
-
       <div class="screen-logos">
         <div class="logo-bingo" id="logoBingoBox"></div>
       </div>
 
-      <div class="lastnumber-circle">
+      <div class="lastnumber-circle" id="scCircle">
         <div class="ln-label">ÚLTIMO NÚMERO</div>
         <div class="ln-value" id="scValue">B-00</div>
         <div class="ln-sorteado">SORTEADO</div>
       </div>
-      
-      <div class="prize-banner" id="scPrizeBanner"></div>
 
+      <div class="prize-banner" id="scPrizeBanner"></div>
     </div>
 
     <div class="screen-right">
@@ -378,14 +533,26 @@ body {
   </div>
 </div>
 
+<!-- ================= MODAL NOVA RODADA ================= -->
+<div class="modal-backdrop" id="modalBackdrop" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <h3 id="modalTitle">Iniciar nova rodada?</h3>
+    <p>Todos os <b id="modalCount">0</b> números registrados serão apagados. Esta ação não pode ser desfeita.</p>
+    <div class="modal-actions">
+      <button class="m-btn ghost" id="modalCancel">Cancelar</button>
+      <button class="m-btn danger" id="modalConfirm">Apagar e reiniciar</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // =====================================================================
-// ===== CONFIGURAÇÕES VISUAIS =====
+// ===== CONFIGURACOES VISUAIS (cole aqui os links reais) =====
 // =====================================================================
 const LOGO_BINGO_URL = "https://framerusercontent.com/images/2SQ8qpEsBz91r0yRBzBGkoqjHPo.png";
 
 // =====================================================================
-// ===== PRÊMIOS =====
+// ===== PREMIOS =====
 // =====================================================================
 const prizes = [
   { name: "Kit WMJoias - Conjunto brincos, anel, colar",      banner: "https://framerusercontent.com/images/8UWgwTGMT9CtRdqrEk0PQsIDo.png", cartela: { label: "Cartela Verde", color: "#3cb54a" }, art: "kit" },
@@ -396,7 +563,7 @@ const prizes = [
   { name: "Colar WMJoias",                                    banner: "https://framerusercontent.com/images/W3GDcnN2VcjZ2DZKfKNLTUv2FhI.png", cartela: null, art: "colar" },
   { name: "Perfume Masculino",                                banner: "https://framerusercontent.com/images/5R9urMPshNXO137Wvq9RveTUgeE.png", cartela: null, art: "perfumemasc" },
   { name: "Mala",                                             banner: "https://framerusercontent.com/images/7e2GnMCF20ywwPCdT9fKQAhAE4.png", cartela: null, art: "mala" },
-  { name: "Purificador de água Slim",                         banner: "https://framerusercontent.com/images/io87lK73GpWHuipa8I2WKuy54Y.png", cartela: null, art: "purificador" },
+  { name: "Purificador de agua Slim",                         banner: "https://framerusercontent.com/images/io87lK73GpWHuipa8I2WKuy54Y.png", cartela: null, art: "purificador" },
   { name: "Relógio feminino",                                 banner: "https://framerusercontent.com/images/Gwd0ffrQqVCYihvT5wQWBfWMwVs.png", cartela: null, art: "relogio" },
   { name: "Furadeira de Impacto Hobby",                       banner: "https://framerusercontent.com/images/pW41AMD9ziziY5R40jLvyCZGs.png", cartela: null, art: "furadeira" },
   { name: "Perfume Feminino",                                 banner: "https://framerusercontent.com/images/jTsZNA5Ko60Wb6b3SlHAnC4t0.png", cartela: null, art: "perfumefem" },
@@ -411,8 +578,9 @@ const cartelaCycle = [
   { label: "Cartela Rosa",    color: "#ec4899" },
   { label: "Cartela Amarela", color: "#f59e0b" }
 ];
-function defaultCartela(i) { return cartelaCycle[i % cartelaCycle.length]; }
+function defaultCartela(i){ return cartelaCycle[i % cartelaCycle.length]; }
 
+// ===== ILUSTRACOES PROVISOrias DOS PRODUTOS =====
 const ICONS = {
   kit: `<g transform="rotate(-8 23 58)"><rect x="8" y="38" width="30" height="40" rx="3" fill="#1c1c1c"/><rect x="18" y="54" width="11" height="3.5" rx="1.5" fill="#d9b36a"/></g><rect x="42" y="46" width="50" height="34" rx="3" fill="#242424"/><rect x="46" y="50" width="42" height="26" rx="2" fill="#3a3a3a"/><path d="M52 54 q15 20 30 0" stroke="#e8c579" stroke-width="2.5" fill="none"/><path d="M67 68 c-3 -4 -9 -2 -9 3 c0 4 9 8 9 8 c0 0 9 -4 9 -8 c0 -5 -6 -7 -9 -3z" fill="#e8c579"/><circle cx="52" cy="56" r="4" fill="#e8c579"/><circle cx="82" cy="56" r="4" fill="#e8c579"/>`,
   esmeralda: `<path d="M22 28 q28 44 56 0" stroke="#e8c579" stroke-width="3" fill="none"/><circle cx="50" cy="50" r="3" fill="#e8c579"/><path d="M50 52 c-7 9 -7 16 0 21 c7 -5 7 -12 0 -21z" fill="#2e9e4f"/><circle cx="22" cy="30" r="5" fill="#2e9e4f"/><circle cx="78" cy="30" r="5" fill="#2e9e4f"/><circle cx="22" cy="22" r="2" fill="#e8c579"/><circle cx="78" cy="22" r="2" fill="#e8c579"/>`,
@@ -424,6 +592,7 @@ const ICONS = {
   mala: `<path d="M18 40 h64 l6 36 h-76z" fill="#2b2b2b"/><path d="M40 40 q10 -16 20 0" stroke="#111111" stroke-width="5" fill="none"/><rect x="16" y="52" width="68" height="4" fill="#454545"/><rect x="24" y="58" width="12" height="12" rx="2" fill="#454545"/><rect x="44" y="58" width="12" height="12" rx="2" fill="#454545"/><rect x="64" y="58" width="12" height="12" rx="2" fill="#454545"/>`
 };
 
+// ===== LOGO PROVISOria =====
 const LOGO_FALLBACK_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 160">
   <g font-family="Montserrat, Arial, sans-serif" font-weight="900" text-anchor="middle">
     <g transform="rotate(-8 34 56)"><rect x="8" y="30" width="52" height="52" rx="6" fill="#fff"/><text x="34" y="69" font-size="38" fill="#F8811C">B</text></g>
@@ -447,148 +616,240 @@ const LOGO_FALLBACK_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 
   </g>
 </svg>`;
 
+// ===== UTILITARIOS =====
 const svgUri = s => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s);
 const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const escAttr = s => esc(s).replace(/"/g,'&quot;');
-function wrapText(s, max) {
+const $ = id => document.getElementById(id);
+function wrapText(s, max){
   const words = s.split(' '); const out = []; let cur = '';
-  for (const w of words) {
-    if ((cur + ' ' + w).trim().length > max) { if (cur) out.push(cur); cur = w; }
+  for(const w of words){
+    if((cur + ' ' + w).trim().length > max){ if(cur) out.push(cur); cur = w; }
     else cur = (cur + ' ' + w).trim();
   }
-  if (cur) out.push(cur);
-  return out.slice(0, 3);
+  if(cur) out.push(cur);
+  return out.slice(0,3);
+}
+function replayPop(el){
+  if(!el) return;
+  el.classList.remove('pop');
+  void el.offsetWidth;
+  el.classList.add('pop');
 }
 
-function fallbackBannerSVG(p, idx, cartela) {
+function fallbackBannerSVG(p, idx, cartela){
   const lines = wrapText(p.name.toUpperCase(), 26);
-  const tspans = lines.map((ln, i) => `<tspan x="210" dy="${i ? 46 : 0}">${esc(ln)}</tspan>`).join('');
+  const tspans = lines.map((ln,i)=>`<tspan x="210" dy="${i?46:0}">${esc(ln)}</tspan>`).join('');
   const bw = cartela.label.length * 15 + 44;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 250">
     <rect width="900" height="250" rx="24" fill="#ffffff"/>
     <svg x="26" y="45" width="160" height="160" viewBox="0 0 100 100">${ICONS[p.art] || ''}</svg>
-    <text x="210" y="82" font-family="Montserrat, Arial, sans-serif" font-style="italic" font-weight="600" font-size="32" fill="#111">Rodada ${idx + 1}</text>
+    <text x="210" y="82" font-family="Montserrat, Arial, sans-serif" font-style="italic" font-weight="600" font-size="32" fill="#111">Rodada ${idx+1}</text>
     <g transform="translate(375,48) skewX(-8)">
       <rect width="${bw}" height="44" rx="10" fill="${cartela.color}"/>
-      <text x="${bw / 2}" y="30" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-style="italic" font-weight="600" font-size="24" fill="#fff">${esc(cartela.label)}</text>
+      <text x="${bw/2}" y="30" text-anchor="middle" font-family="Montserrat, Arial, sans-serif" font-style="italic" font-weight="600" font-size="24" fill="#fff">${esc(cartela.label)}</text>
     </g>
     <text x="210" y="152" font-family="Montserrat, Arial, sans-serif" font-weight="800" font-size="38" fill="#141414" letter-spacing="1">${tspans}</text>
   </svg>`;
 }
 
-const letters = ["B", "I", "N", "G", "O"];
-const ranges  = [[1,15], [16,30], [31,45], [46,60], [61,75]];
+// ===== ESTADO =====
+const letters = ["B","I","N","G","O"];
+const ranges  = [[1,15],[16,30],[31,45],[46,60],[61,75]];
 let drawn = [];
 let last  = null;
 let currentPrize = 0;
 
-function init() {
-  const sp = document.getElementById('selPrize');
-  prizes.forEach((p, i) => {
+function init(){
+  const sp = $('selPrize');
+  prizes.forEach((p,i)=>{
     const o = document.createElement('option');
-    o.value = i; o.textContent = p.name;
+    o.value = i; o.textContent = (i+1) + '. ' + p.name;
     sp.appendChild(o);
   });
 
-  document.getElementById('logoBingoBox').innerHTML =
+  $('logoBingoBox').innerHTML =
     LOGO_BINGO_URL ? `<img src="${escAttr(LOGO_BINGO_URL)}" alt="Bingo Mamma Mia!">` : LOGO_FALLBACK_SVG;
 
   buildGrid();
   buildScreenGrid();
   updateRound();
   render();
+  bindModal();
 }
 
-function buildGrid() {
-  const g = document.getElementById('numGrid');
-  for (let c = 0; c < 5; c++) for (let n = ranges[c][0]; n <= ranges[c][1]; n++) {
-    const d = document.createElement('div');
-    d.className = 'grid-cell'; d.textContent = n; d.dataset.n = n;
-    d.onclick = () => registerNumber(n);
-    g.appendChild(d);
+function buildGrid(){
+  const g = $('numGrid');
+  const frag = document.createDocumentFragment();
+  for(let c=0;c<5;c++){
+    for(let n=ranges[c][0]; n<=ranges[c][1]; n++){
+      const d = document.createElement('button');
+      d.type = 'button';
+      d.className = 'grid-cell';
+      d.textContent = n;
+      d.dataset.n = n;
+      d.setAttribute('aria-label', 'Sortear número ' + n + ', letra ' + letters[c]);
+      d.addEventListener('click', ()=> registerNumber(n));
+      frag.appendChild(d);
+    }
   }
+  g.appendChild(frag);
 }
 
-function buildScreenGrid() {
-  const g = document.getElementById('scGrid');
+function buildScreenGrid(){
+  const g = $('scGrid');
   g.innerHTML = '';
-  for (let c = 0; c < 5; c++) for (let n = ranges[c][0]; n <= ranges[c][1]; n++) {
-    const d = document.createElement('div');
-    d.className = 'sgCell'; d.dataset.sn = n; d.textContent = n;
-    g.appendChild(d);
+  const frag = document.createDocumentFragment();
+  for(let c=0;c<5;c++){
+    for(let n=ranges[c][0]; n<=ranges[c][1]; n++){
+      const d = document.createElement('div');
+      d.className = 'sgCell'; d.dataset.sn = n; d.textContent = n;
+      frag.appendChild(d);
+    }
   }
+  g.appendChild(frag);
 }
 
-function registerNumber(n) {
-  if (drawn.includes(n)) return;
+function registerNumber(n){
+  if(drawn.includes(n)) return;
   drawn.push(n); last = n; render();
+  if(navigator.vibrate){ try{ navigator.vibrate(18); }catch(e){} }
 }
-function undoLast() {
-  if (!drawn.length) return;
-  const n = drawn.pop();
-  if (last === n) last = drawn[drawn.length - 1] || null;
+function undoLast(){
+  if(!drawn.length) return;
+  drawn.pop();
+  last = drawn.length ? drawn[drawn.length-1] : null;
   render();
-}
-function newRound() {
-  if (!confirm("Iniciar uma nova rodada? Todos os números registrados serão apagados.")) return;
-  drawn = []; last = null; render();
+  if(navigator.vibrate){ try{ navigator.vibrate([10,40,10]); }catch(e){} }
 }
 
-function updateRound() {
-  currentPrize = +document.getElementById('selPrize').value;
+// ===== MODAL NOVA RODADA =====
+function bindModal(){
+  $('modalCancel').addEventListener('click', closeModal);
+  $('modalConfirm').addEventListener('click', ()=>{
+    closeModal();
+    drawn = []; last = null; render();
+  });
+  $('modalBackdrop').addEventListener('click', e=>{
+    if(e.target.id === 'modalBackdrop') closeModal();
+  });
+}
+function newRound(){
+  $('modalCount').textContent = drawn.length;
+  $('modalBackdrop').classList.add('open');
+  $('modalBackdrop').setAttribute('aria-hidden','false');
+}
+function closeModal(){
+  $('modalBackdrop').classList.remove('open');
+  $('modalBackdrop').setAttribute('aria-hidden','true');
+}
+
+// ===== ATUALIZACAO DA RODADA =====
+function updateRound(){
+  currentPrize = +$('selPrize').value;
   const p = prizes[currentPrize];
   const cartela = p.cartela || defaultCartela(currentPrize);
 
-  document.getElementById('roundDisplay').textContent = p.name;
+  $('roundDisplay').textContent = p.name;
+  $('mPrize').textContent = p.name;
 
-  const box = document.getElementById('scPrizeBanner');
-  if (p.banner) box.innerHTML = `<img src="${escAttr(p.banner)}" alt="${escAttr(p.name)}">`;
-  else          box.innerHTML = fallbackBannerSVG(p, currentPrize, cartela);
+  const box = $('scPrizeBanner');
+  if(p.banner) box.innerHTML = `<img src="${escAttr(p.banner)}" alt="${escAttr(p.name)}">`;
+  else         box.innerHTML = fallbackBannerSVG(p, currentPrize, cartela);
 
-  document.getElementById('orgBannerPreview').src =
-    p.banner || svgUri(fallbackBannerSVG(p, currentPrize, cartela));
+  $('orgBannerPreview').src = p.banner || svgUri(fallbackBannerSVG(p, currentPrize, cartela));
 }
 
-function render() {
-  document.querySelectorAll('#numGrid .grid-cell').forEach(b => {
+// ===== RENDER =====
+function render(){
+  const set = new Set(drawn);
+
+  document.querySelectorAll('#numGrid .grid-cell').forEach(b=>{
     const n = +b.dataset.n;
-    b.classList.toggle('called', drawn.includes(n));
+    const called = set.has(n);
+    b.classList.toggle('called', called);
     b.classList.toggle('latest', n === last);
+    b.setAttribute('aria-pressed', called ? 'true' : 'false');
   });
-  document.querySelectorAll('#scGrid .sgCell').forEach(d => {
+
+  document.querySelectorAll('#scGrid .sgCell').forEach(d=>{
     const n = +d.dataset.sn;
-    d.classList.toggle('on', drawn.includes(n));
+    d.classList.toggle('on', set.has(n));
     d.classList.toggle('latestNew', n === last);
   });
 
-  const letraAtual = last ? letters[Math.ceil(last / 15) - 1] : '-';
-  document.getElementById('lastLetterBall').textContent = letraAtual;
-  document.getElementById('lastNumberBall').textContent = last || '-';
-  document.getElementById('drawnCount').textContent = drawn.length;
-  document.getElementById('scValue').textContent = last ? letraAtual + '-' + String(last).padStart(2, '0') : 'B-00';
+  const letraAtual = last ? letters[Math.ceil(last/15)-1] : '-';
+  const numStr = last ? String(last).padStart(2,'0') : '--';
 
-  const h = document.getElementById('history');
+  // Bola grande (aba Rodada)
+  const bb = $('lastBall');
+  bb.classList.toggle('empty', !last);
+  $('lastLetterBall').textContent = letraAtual;
+  $('lastNumberBall').textContent = last || '-';
+  $('drawnCount').textContent = drawn.length;
+
+  // Bola compacta (aba Números / mobile)
+  const mb = $('mBall');
+  mb.classList.toggle('empty', !last);
+  $('mLetter').textContent = letraAtual;
+  $('mNumber').textContent = last ? numStr : '--';
+  $('mCount').textContent = drawn.length;
+
+  // Telão
+  $('scValue').textContent = last ? letraAtual + '-' + numStr : 'B-00';
+
+  // Estado dos botões desfazer
+  document.querySelectorAll('[data-undo]').forEach(b=>{ b.disabled = drawn.length === 0; });
+
+  // Histórico
+  const h = $('history');
   h.innerHTML = '';
-  [...drawn].reverse().forEach((n, i) => {
-    const s = document.createElement('span');
-    s.textContent = letters[Math.ceil(n / 15) - 1] + n;
-    if (i === 0) s.classList.add('recent');
-    h.appendChild(s);
-  });
+  if(!drawn.length){
+    const hint = document.createElement('span');
+    hint.className = 'empty-hint';
+    hint.textContent = 'Nenhum número sorteado ainda.';
+    h.appendChild(hint);
+  } else {
+    const frag = document.createDocumentFragment();
+    [...drawn].reverse().forEach((n,i)=>{
+      const s = document.createElement('span');
+      s.textContent = letters[Math.ceil(n/15)-1] + n;
+      if(i===0) s.classList.add('recent');
+      frag.appendChild(s);
+    });
+    h.appendChild(frag);
+  }
+
+  if(last){ replayPop(bb); replayPop(mb); replayPop($('scCircle')); }
 }
 
-function setTab(t) {
-  document.querySelectorAll('.tab').forEach(b => {
-    const isActive = (t === 'org' && b.textContent.trim() === 'Organizador') ||
-                     (t === 'screen' && b.textContent.trim() === 'Modo Telão');
-    b.classList.toggle('active', isActive);
-  });
-  document.querySelectorAll('.panel').forEach(p => p.classList.toggle('active', p.id === 'panel-' + t));
+// ===== NAVEGAÇÃO =====
+function setTab(t){
+  document.querySelectorAll('.tab').forEach(b=> b.classList.toggle('active', b.dataset.tab === t));
+  document.querySelectorAll('.panel').forEach(p=> p.classList.toggle('active', p.id === 'panel-' + t));
+  if(t === 'screen'){
+    const sp = $('panel-screen');
+    if(sp) sp.scrollTop = 0;
+  }
 }
 
-document.addEventListener('keydown', (e) => {
-  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') { e.preventDefault(); undoLast(); }
+function setOrgView(v){
+  const panel = $('panel-org');
+  panel.dataset.view = v;
+  document.querySelectorAll('.subtab').forEach(b=> b.classList.toggle('active', b.dataset.view === v));
+  const pane = v === 'nums' ? document.querySelector('.org-right') : document.querySelector('.org-left');
+  if(pane) pane.scrollTop = 0;
+}
+
+document.addEventListener('keydown', e=>{
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z'){ e.preventDefault(); undoLast(); }
+  if(e.key === 'Escape') closeModal();
 });
+
+// Evita zoom por duplo toque nos botões da grade
+document.addEventListener('dblclick', e=>{
+  if(e.target.closest && e.target.closest('.grid-cell')) e.preventDefault();
+}, { passive:false });
 
 init();
 </script>
